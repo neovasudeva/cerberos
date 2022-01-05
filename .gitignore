@@ -1,0 +1,7 @@
+# igonre build directories
+build/binutils-*
+build/gcc-*
+build/build-*
+
+# swp files
+*.swp
