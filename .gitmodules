@@ -1,0 +1,7 @@
+[submodule "deps/stivale"]
+	path = deps/stivale
+	url = https://github.com/stivale/stivale
+[submodule "deps/limine"]
+	path = deps/limine
+	url = https://github.com/limine-bootloader/limine/
+	branch = v2.0-branch-binary
