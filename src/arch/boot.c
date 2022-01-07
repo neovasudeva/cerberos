@@ -2,6 +2,7 @@
 #include <stddef.h>
 #include "stivale2.h"
 #include "text.h"
+#include "com.h"
 
 #define UNUSED(expr) ((void) expr)
 
@@ -11,15 +12,10 @@
 void _start(struct stivale2_struct *stivale2_struct) {
     UNUSED(stivale2_struct);
 
-    text_write(0, 'H', RED, GREEN);
-    text_write(1, 'e', RED, GREEN);
-    text_write(2, 'l', RED, GREEN);
-    text_write(3, 'l', RED, GREEN);
-    text_write(4, 'o', RED, GREEN);
+    com_init();
+    com_log("hello world\n");
+    com_log("how is it going today?\n");
 
-    // set cursor to position 10
-    move_cursor(6);
-    
     for (;;) {
         asm ("hlt");
     }

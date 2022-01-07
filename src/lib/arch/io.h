@@ -12,8 +12,8 @@
 inline uint8_t inb(uint16_t port) {
     uint8_t data;
     asm volatile (
-        "xorl %0, %0"
-        "inb %1, %0"
+        "xorb %0, %0 \n\
+        inb %1, %0"
         : "=a"(data)
         : "d"(port)
         :
@@ -27,8 +27,8 @@ inline uint8_t inb(uint16_t port) {
 inline uint16_t inw(uint16_t port) {
     uint16_t data;
     asm volatile (
-        "xorl %0, %0"
-        "inw %1, %0"
+        "xorw %0, %0 \n\
+        inw %1, %0"
         : "=a"(data)
         : "d"(port)
         :
@@ -42,8 +42,8 @@ inline uint16_t inw(uint16_t port) {
 inline uint32_t inl(uint16_t port) {
     uint32_t data;
     asm volatile (
-        "xorl %0, %0"
-        "inl %1, %0"
+        "xorl %0, %0 \n\
+        inl %1, %0"
         : "=a"(data)
         : "d"(port)
         :
