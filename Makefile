@@ -8,14 +8,12 @@ CFLAGS?= \
 	-std=gnu11 \
 	-Wall \
 	-Wextra \
-	-Werror \
 	-O2 \
 	-pipe \
 
 KCFLAGS= \
 	$(CFLAGS) \
-	-Ideps/stivale		 \
-	-Ideps/limine 		 \
+	-Ideps				 \
 	-ffreestanding       \
 	-fno-stack-protector \
 	-fno-pic             \
@@ -45,6 +43,7 @@ QEMUFLAGS= \
 	-m 512 \
 	-smp 1 \
 	-drive format=raw,media=cdrom,file=$(SYSROOT_ISO) \
+	-serial stdio
 
 .PHONY: all
 all: $(SYSROOT_ISO)

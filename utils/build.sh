@@ -47,7 +47,8 @@ then
   mkdir build-gcc
   cd build-gcc
   ../$GCC_DIR/configure --target=$TARGET --prefix="$PREFIX" --disable-nls --enable-languages=c,c++ --without-headers
-  # remember that libgcc has 2 versions: one with red-zone and one with no-red-zone
+  # remember that libgcc has 2 versions: one with red-zone and one with no-red-zone and 
+  # YOU HAVE TO MANUALLY CHANGE GCC CONFIG TO BUILD WITH NO-RED-ZONE
   make all-gcc
   make all-target-libgcc
   make install-gcc
