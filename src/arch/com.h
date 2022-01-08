@@ -19,7 +19,7 @@
 #define SERIAL_COM4                     0x2E8
 
 #define SERIAL_DATA_PORT(base)          (base)
-#define SERIAL_INTERRUPT_PORT(base)     (base + 1)
+#define SERIAL_DIVISOR_HIGH_PORT(base)     (base + 1)
 #define SERIAL_FIFO_COMMAND_PORT(base)  (base + 2)
 #define SERIAL_LINE_COMMAND_PORT(base)  (base + 3)
 #define SERIAL_MODEM_COMMAND_PORT(base) (base + 4)
@@ -32,7 +32,3 @@ void com_write(uint16_t com, const char* buf, uint32_t len);
 void com_log(const char* buf);
 void _com_init(uint16_t com, uint16_t divisor);
 void com_init(void);
-
-
-
-

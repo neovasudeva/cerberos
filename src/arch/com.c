@@ -25,7 +25,7 @@ void _com_init(uint16_t com, uint16_t divisor) {
     /* establish baud rate */
     outb(SERIAL_LINE_COMMAND_PORT(com), SERIAL_ENABLE_DLB);
     outb(SERIAL_DATA_PORT(com), divisor & 0xFF);
-    outb(SERIAL_INTERRUPT_PORT(com), (divisor >> 8) & 0xFF);
+    outb(SERIAL_DIVISOR_HIGH_PORT(com), (divisor >> 8) & 0xFF);
 
     /* configure line */
     outb(SERIAL_LINE_COMMAND_PORT(com), 0x03);
