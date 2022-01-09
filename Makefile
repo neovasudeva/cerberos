@@ -3,6 +3,7 @@
 # TODO: add compiler and linker to PATH
 CC=~/opt/cross/bin/x86_64-elf-gcc
 LD=~/opt/cross/bin/x86_64-elf-ld
+ASM=nasm
 
 CFLAGS?= \
 	-std=gnu11 \
@@ -33,6 +34,9 @@ KLDFLAGS= \
 	-Tsrc/arch/linker.ld \
 	-z max-page-size=0x1000 \
 	--no-dynamic-linker 
+
+KASMFLAGS= \
+	-felf64
 
 MKPDIR=mkdir -p $(@D)
 
