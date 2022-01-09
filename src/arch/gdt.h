@@ -26,7 +26,7 @@ typedef struct {
     uint64_t ist[7];
     uint64_t reserve3;
     uint16_t reserve4;
-    uint8_t iopb_offset;
+    uint16_t iopb_offset;
 } __attribute__((packed)) tss_t;
 
 /* 64-bit tss descriptor */
@@ -55,8 +55,8 @@ typedef struct {
 
 /* will lgdt with this struct */
 typedef struct {
-    uint64_t address;
     uint16_t size;
+    uint64_t address;
 } __attribute__((packed)) gdt_info_t;
 
 /* segment descriptor --> entries in the gdt */
@@ -80,5 +80,4 @@ typedef struct {
 seg_descriptor_t gdt_create_entry(uint32_t limit, uint32_t base, uint8_t access, uint8_t flags);
 tss_descriptor_t gdt_create_tss_entry(tss_t* tss_ptr);
 void gdt_init(void);
-
 extern void gdt_load();

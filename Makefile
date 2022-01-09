@@ -11,6 +11,8 @@ CFLAGS?= \
 	-Wextra \
 	-O2 \
 	-pipe \
+	-g \
+	-ggdb
 
 KCFLAGS= \
 	$(CFLAGS) \
@@ -47,7 +49,8 @@ QEMUFLAGS= \
 	-m 512 \
 	-smp 1 \
 	-drive format=raw,media=cdrom,file=$(SYSROOT_ISO) \
-	-serial stdio
+	-serial stdio \
+	-s -S
 
 .PHONY: all
 all: $(SYSROOT_ISO)

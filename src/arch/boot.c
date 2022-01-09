@@ -3,6 +3,7 @@
 #include "stivale2.h"
 #include "text.h"
 #include "com.h"
+#include "gdt.h"
 
 #define UNUSED(expr) ((void) expr)
 
@@ -13,8 +14,8 @@ void _start(struct stivale2_struct *stivale2_struct) {
     UNUSED(stivale2_struct);
 
     com_init();
-    com_log("hello world\n");
-    com_log("how is it going today?\n");
+    gdt_init();
+    text_write(0, 'H', RED, GREEN);
 
     for (;;) {
         asm ("hlt");

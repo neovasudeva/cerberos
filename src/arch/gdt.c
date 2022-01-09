@@ -10,7 +10,7 @@ seg_descriptor_t gdt_create_entry(uint32_t limit, uint32_t base, uint8_t access,
         .base_low = (uint16_t) (base & 0xFFFF),
         .base_mid = (uint8_t) ((base >> 16) & 0xFF),
         .access = access,
-        .limit_high = ((limit >> 16) && 0xF),
+        .limit_high = ((limit >> 16) && 0x0F),
         .flags = flags,
         .base_high = (uint8_t) ((base >> 24) && 0xFF)
     };
@@ -28,7 +28,7 @@ tss_descriptor_t gdt_create_tss_entry(tss_t* tss_ptr) {
         .zeroes1 = 0b0,
         .dpl = 0b00,
         .present = 0b1,
-        .limit_19_16 = ((limit >> 16) & 0xF),
+        .limit_19_16 = ((limit >> 16) & 0x0F),
         .avl = 0b0,
         .zeroes2 = 0b00,
         .granularity = 0b0,
@@ -48,14 +48,14 @@ void gdt_init(void) {
      */
     gdt.gdt_entries[0] = gdt_create_entry(0, 0, 0, 0);
     gdt.gdt_entries[1] = gdt_create_entry(0, 0, GDT_ACCESS_PRESENT | GDT_ACCESS_SEG_SYS | GDT_ACCESS_EXEC | GDT_ACCESS_RW, GDT_FLAGS_LONG_MODE);
-    gdt.gdt_entries[2] = gdt_create_entry(0, 0, GDT_ACCESS_PRESENT | GDT_ACCESS_SEG_SYS | GDT_ACCESS_RW, GDT_FLAGS_LONG_MODE);
+    gdt.gdt_entries[2] = gdt_create_entry(0, 0, GDT_ACCESS_PRESENT | GDT_ACCESS_SEG_SYS | GDT_ACCESS_RW, 0);
     gdt.gdt_entries[3] = gdt_create_entry(0, 0, GDT_ACCESS_PRESENT | GDT_ACCESS_PL3 | GDT_ACCESS_SEG_SYS | GDT_ACCESS_EXEC | GDT_ACCESS_RW, GDT_FLAGS_LONG_MODE);
-    gdt.gdt_entries[4] = gdt_create_entry(0, 0, GDT_ACCESS_PRESENT | GDT_ACCESS_PL3 | GDT_ACCESS_SEG_SYS | GDT_ACCESS_RW, GDT_FLAGS_LONG_MODE);
+    gdt.gdt_entries[4] = gdt_create_entry(0, 0, GDT_ACCESS_PRESENT | GDT_ACCESS_PL3 | GDT_ACCESS_SEG_SYS | GDT_ACCESS_RW, 0);
 
     gdt.tss_descrip = gdt_create_tss_entry(&tss);
 
-    gdt_info.size = sizeof(gdt) - 1;
     gdt_info.address = (uint64_t) &gdt;
+    gdt_info.size = sizeof(gdt_t) - 1;
 
     gdt_load();
 }
