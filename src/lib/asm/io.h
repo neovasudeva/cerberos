@@ -9,7 +9,7 @@
 /* 
  * inb reads a byte from a port and returns it
  */
-inline uint8_t inb(uint16_t port) {
+static inline uint8_t inb(uint16_t port) {
     uint8_t data;
     asm volatile (
         "xorb %0, %0 \n\
@@ -24,7 +24,7 @@ inline uint8_t inb(uint16_t port) {
 /* 
  * inw reads 2 bytes from 2 consecutive ports and returns it
  */
-inline uint16_t inw(uint16_t port) {
+static inline uint16_t inw(uint16_t port) {
     uint16_t data;
     asm volatile (
         "xorw %0, %0 \n\
@@ -39,7 +39,7 @@ inline uint16_t inw(uint16_t port) {
 /* 
  * inw reads 4 bytes from 4 consecutive ports and returns it
  */
-inline uint32_t inl(uint16_t port) {
+static inline uint32_t inl(uint16_t port) {
     uint32_t data;
     asm volatile (
         "xorl %0, %0 \n\
@@ -54,7 +54,7 @@ inline uint32_t inl(uint16_t port) {
 /*
  * outb writes a byte to a port
  */
-inline void outb(uint16_t port, uint8_t data) {
+static inline void outb(uint16_t port, uint8_t data) {
     asm volatile (
         "outb %0, %1"
         :
@@ -66,7 +66,7 @@ inline void outb(uint16_t port, uint8_t data) {
 /*
  * outw writes 2 bytes to 2 consecutive ports
  */
-inline void outw(uint16_t port, uint16_t data) {
+static inline void outw(uint16_t port, uint16_t data) {
     asm volatile (
         "outw %0, %1"
         :
@@ -78,7 +78,7 @@ inline void outw(uint16_t port, uint16_t data) {
 /*
  * outl writes 4 bytes to 4 consecutive ports
  */
-inline void outl(uint16_t port, uint32_t data) {
+static inline void outl(uint16_t port, uint32_t data) {
     asm volatile (
         "outl %0, %1"
         :

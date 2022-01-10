@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <libmacros.h>
+#include <asm/asm.h>
 #include "stivale2.h"
 #include "text.h"
 #include "com.h"
@@ -16,6 +17,6 @@ void _start(struct stivale2_struct *stivale2_struct) {
     text_write(0, 'H', RED, GREEN);
 
     for (;;) {
-        asm ("hlt");
+        hlt();
     }
 }

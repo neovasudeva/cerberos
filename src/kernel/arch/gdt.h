@@ -51,7 +51,7 @@ typedef struct {
     uint8_t reserve1;
     uint8_t zeroes3 : 5;
     uint64_t reserve2 : 19;
-} __attribute__((packed)) tss_descriptor_t;
+} __attribute__((packed)) tss_desc_t;
 
 /* will lgdt with this struct */
 typedef struct {
@@ -69,15 +69,15 @@ typedef struct {
     uint8_t limit_high : 4;
     uint8_t flags : 4;
     uint8_t base_high;
-} __attribute__((packed)) seg_descriptor_t;
+} __attribute__((packed)) seg_desc_t;
 
 /* gdt */
 typedef struct {
-    seg_descriptor_t gdt_entries[GDT_ENTRIES];
-    tss_descriptor_t tss_descrip;
+    seg_desc_t gdt_entries[GDT_ENTRIES];
+    tss_desc_t tss_desc;
 } __attribute__((packed)) gdt_t;
 
-seg_descriptor_t gdt_create_entry(uint32_t limit, uint32_t base, uint8_t access, uint8_t flags);
-tss_descriptor_t gdt_create_tss_entry(tss_t* tss_ptr);
+seg_desc_t gdt_create_entry(uint32_t limit, uint32_t base, uint8_t access, uint8_t flags);
+tss_desc_t gdt_create_tss_entry(tss_t* tss_ptr);
 void gdt_init(void);
 extern void gdt_load();
