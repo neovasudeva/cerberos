@@ -1,5 +1,5 @@
-KERNEL_C_SRC+=$(wildcard src/arch/*.c)
-KERNEL_S_SRC+=$(wildcard src/arch/*.S)
+KERNEL_C_SRC+=$(wildcard src/kernel/arch/*.c)
+KERNEL_S_SRC+=$(wildcard src/kernel/arch/*.S)
 KERNEL_OBJ= \
 	$(patsubst src/%.c, build/%.c.o, $(KERNEL_C_SRC)) \
 	$(patsubst src/%.S, build/%.S.o, $(KERNEL_S_SRC))
@@ -8,11 +8,11 @@ KERNEL_DEPS=$(KERNEL_SRC:.c=.d)
 KERNEL_BIN=build/kernel.elf
 
 -include $(KERNEL_DEPS)
-build/arch/%.c.o: src/arch/%.c
+build/kernel/arch/%.c.o: src/kernel/arch/%.c
 	$(MKPDIR)
 	$(CC) $(KCFLAGS) -c $^ -o $@ 
 
-build/arch/%.S.o: src/arch/%.S
+build/kernel/arch/%.S.o: src/kernel/arch/%.S
 	$(MKDIR)
 	$(ASM) $^ $(KASMFLAGS) -o $@ 
 

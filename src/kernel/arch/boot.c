@@ -1,11 +1,9 @@
 #include <stdint.h>
-#include <stddef.h>
+#include <libmacros.h>
 #include "stivale2.h"
 #include "text.h"
 #include "com.h"
 #include "gdt.h"
-
-#define UNUSED(expr) ((void) expr)
 
 /*
  * entry point for kernel 

@@ -17,6 +17,7 @@ CFLAGS?= \
 KCFLAGS= \
 	$(CFLAGS) \
 	-Ideps				 \
+	-Isrc/lib			 \
 	-ffreestanding       \
 	-fno-stack-protector \
 	-fno-pic             \
@@ -33,7 +34,7 @@ KCFLAGS= \
 KLDFLAGS= \
 	-static \
 	-nostdlib \
-	-Tsrc/arch/linker.ld \
+	-Tsrc/kernel/arch/linker.ld \
 	-z max-page-size=0x1000 \
 	--no-dynamic-linker 
 
@@ -42,7 +43,7 @@ KASMFLAGS= \
 
 MKPDIR=mkdir -p $(@D)
 
-include src/arch/.build.mk
+include src/kernel/.build.mk
 include src/sysroot/.build.mk
 
 QEMUFLAGS= \
