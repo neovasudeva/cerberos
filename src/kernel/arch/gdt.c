@@ -2,7 +2,7 @@
 
 static tss_t tss = {0};
 gdt_t gdt = {};
-gdt_info_t gdt_info = {};
+gdtr_t gdt_info = {};
 
 seg_desc_t gdt_create_entry(uint32_t limit, uint32_t base, uint8_t access, uint8_t flags) {
     seg_desc_t entry = {

@@ -57,7 +57,7 @@ typedef struct {
 typedef struct {
     uint16_t size;
     uint64_t address;
-} __attribute__((packed)) gdt_info_t;
+} __attribute__((packed)) gdtr_t;
 
 /* segment descriptor --> entries in the gdt */
 /* Note that in 64-bit mode, limit and base are ignored */
