@@ -28,4 +28,3 @@ typedef struct {
 } __attribute__ ((packed)) cpu_state_t;
 
 void general_intr_handler(cpu_state_t cpu_state); 
-void kbd_intr_handler(cpu_state_t cpu_state);
