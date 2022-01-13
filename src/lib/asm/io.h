@@ -87,3 +87,10 @@ static inline void outl(uint16_t port, uint32_t data) {
     );
 }
 
+/*
+ * io_wait throws data out to unregistered port
+ * used to give time for I/O operations
+ */
+static inline void io_wait(void) {
+    outb(0x80, 0);
+}

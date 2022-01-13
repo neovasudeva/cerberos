@@ -19,15 +19,13 @@ typedef struct {
     uint64_t rcx;
     uint64_t rbx;
     uint64_t rax;
-} __attribute__ ((packed)) cpu_state_t;
 
-/* data pushed onto stack by CPU during interrupt */
-typedef struct {
+    uint64_t int_vec;
     uint64_t error_code;
     uint64_t rip;
     uint64_t cs;
     uint64_t rflags;
-} __attribute__ ((packed)) stack_state_t;
+} __attribute__ ((packed)) cpu_state_t;
 
-void interrupt_handler(cpu_state_t cpu_state, stack_state_t stack_state, uint64_t int_vec); 
-
+void general_intr_handler(cpu_state_t cpu_state); 
+void kbd_intr_handler(cpu_state_t cpu_state);

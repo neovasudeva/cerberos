@@ -28,6 +28,6 @@ void idt_init(void) {
         idt_set_descriptor(i, isr_addr_table[i], INT_GATE | PL0 | PRESENT);
     }
 
-    /* load idt */
+    /* load idtr */
     idt_load();
 }

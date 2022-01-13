@@ -5,6 +5,9 @@
 #include "text.h"
 #include "com.h"
 #include "gdt.h"
+#include "idt.h"
+#include "pic.h"
+#include "kbd.h"
 
 /*
  * entry point for kernel 
@@ -14,7 +17,9 @@ void _start(struct stivale2_struct *stivale2_struct) {
 
     com_init();
     gdt_init();
-    text_write(0, 'H', RED, GREEN);
+    idt_init();
+    pic_init();
+    kbd_init();
 
     for (;;) {
         hlt();

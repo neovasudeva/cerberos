@@ -6,7 +6,7 @@
  * https://github.com/stivale/stivale/blob/master/STIVALE2.md
  */
  
-static uint8_t stack[8192];
+static uint8_t stack[16384];
 
 /* 
  * kernel to bootloader tags

@@ -1,9 +1,9 @@
 #pragma once
 
 #include <stdint.h>
-#include <asm/io.h> // fix me
+#include <asm/io.h>
 
-#define TEXT_ADDR       0xb8000
+#define TEXT_ADDR       0xB8000
 #define TEXT_WIDTH      80
 #define TEXT_HEIGHT     25
 
