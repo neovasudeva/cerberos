@@ -2,6 +2,17 @@
 #include "pic.h"
 
 void pic_init() {
+    /* remap pic */
+    pic_remap();
+
+    /* disable all interrupts */
+    pic_disable();
+
+    /* enable slave PIC */
+    enable_irq(SLAVE_LINE);
+}
+
+void pic_remap() {
     /* cascade mode */
     outb(MASTER_COMMAND_PORT, ICW1);
     io_wait();
@@ -31,9 +42,14 @@ void pic_init() {
     io_wait();
     outb(SLAVE_DATA_PORT, 0xFF);
     io_wait();
+}
 
-    /* enable slave PIC */
-    enable_irq(SLAVE_LINE);
+void pic_disable(void) {
+    /* disable all interrupts */
+    outb(MASTER_DATA_PORT, 0xFF);
+    io_wait();
+    outb(SLAVE_DATA_PORT, 0xFF);
+    io_wait();
 }
 
 void enable_irq(uint8_t irq) {

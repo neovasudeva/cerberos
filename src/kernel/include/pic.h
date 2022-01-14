@@ -27,7 +27,9 @@
 /* EOI signal to send to both PICs */
 #define EOI 0x20
 
-void pic_init();
+void pic_init(void);
+void pic_remap(void);
+void pic_disable(void);
 void enable_irq(uint8_t irq);
 void disable_irq(uint8_t irq);
 void send_eoi(uint8_t irq);

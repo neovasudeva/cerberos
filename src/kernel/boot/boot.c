@@ -19,8 +19,7 @@ void _start(struct stivale2_struct *stivale2_struct) {
     com_init();
     gdt_init();
     idt_init();
-    pic_init();
-    kbd_init();
+    pic_disable();
 
     for (;;) {
         hlt();
