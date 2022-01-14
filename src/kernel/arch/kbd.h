@@ -8,3 +8,4 @@
 
 void kbd_init(void);
 void kbd_intr_handler(void);
+extern void wrapper_kbd_intr_handler(void);

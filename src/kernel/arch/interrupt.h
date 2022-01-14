@@ -27,4 +27,5 @@ typedef struct {
     uint64_t rflags;
 } __attribute__ ((packed)) cpu_state_t;
 
-void general_intr_handler(cpu_state_t cpu_state); 
+void generic_intr_handler(cpu_state_t cpu_state); 
+void register_intr_handler(void* handler, uint8_t irq_num);
