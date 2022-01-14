@@ -6,7 +6,7 @@ void pic_init() {
     pic_remap();
 
     /* disable all interrupts */
-    pic_disable();
+    pic_disable_all();
 
     /* enable slave PIC */
     enable_irq(SLAVE_LINE);
@@ -44,12 +44,16 @@ void pic_remap() {
     io_wait();
 }
 
-void pic_disable(void) {
-    /* disable all interrupts */
+void pic_disable_all(void) {
     outb(MASTER_DATA_PORT, 0xFF);
     io_wait();
     outb(SLAVE_DATA_PORT, 0xFF);
     io_wait();
+}
+
+void pic_disable(void) {
+    pic_remap();
+    pic_disable_all();
 }
 
 void enable_irq(uint8_t irq) {

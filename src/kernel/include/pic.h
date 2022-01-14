@@ -30,6 +30,7 @@
 void pic_init(void);
 void pic_remap(void);
 void pic_disable(void);
+void pic_disable_all(void);
 void enable_irq(uint8_t irq);
 void disable_irq(uint8_t irq);
 void send_eoi(uint8_t irq);
