@@ -1,4 +1,4 @@
-%include "src/kernel/arch/interrupt_util.S"
+%include "asm_util.S"
 
 %define KBD_INTR_VEC 0x21
 

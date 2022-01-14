@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <libmacros.h>
 #include <asm/asm.h>
+
 #include "stivale2.h"
 #include "text.h"
 #include "com.h"

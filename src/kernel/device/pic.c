@@ -1,5 +1,5 @@
-#include "pic.h"
 #include <asm/io.h>
+#include "pic.h"
 
 void pic_init() {
     /* cascade mode */

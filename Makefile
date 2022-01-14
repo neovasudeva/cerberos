@@ -17,6 +17,7 @@ CFLAGS?= \
 KCFLAGS= \
 	$(CFLAGS) \
 	-Ideps				 \
+	-Isrc/kernel/include \
 	-Isrc/lib			 \
 	-ffreestanding       \
 	-fno-stack-protector \
@@ -34,12 +35,13 @@ KCFLAGS= \
 KLDFLAGS= \
 	-static \
 	-nostdlib \
-	-Tsrc/kernel/arch/linker.ld \
+	-Tsrc/kernel/boot/linker.ld \
 	-z max-page-size=0x1000 \
 	--no-dynamic-linker 
 
 KASMFLAGS= \
-	-felf64
+	-felf64 \
+	-Isrc/kernel/include/
 
 MKPDIR=mkdir -p $(@D)
 

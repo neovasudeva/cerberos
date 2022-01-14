@@ -1,4 +1,4 @@
-%include "src/kernel/arch/interrupt_util.S"
+%include "asm_util.S"
 
 %macro isr_err 1
 intr_%1:

@@ -1,10 +1,11 @@
+#include <asm/asm.h>
+#include <libmacros.h>
+
 #include "interrupt.h"
 #include "com.h"
 #include "kbd.h"
 #include "pic.h"
 #include "idt.h"
-#include <asm/asm.h>
-#include <libmacros.h>
 
 extern void* isr_addr_table[];
 
