@@ -1,5 +1,5 @@
-#include <asm/asm.h>
-#include <libmacros.h>
+#include <core/asm.h>
+#include <core/macros.h>
 
 #include "interrupt.h"
 #include "com.h"

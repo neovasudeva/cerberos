@@ -1,7 +1,7 @@
 #pragma once
 
 #include <stdint.h>
-#include <asm/io.h> // fix me
+#include <core/io.h> // fix me
 
 /*
  * serial I/O

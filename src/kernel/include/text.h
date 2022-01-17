@@ -1,7 +1,7 @@
 #pragma once
 
 #include <stdint.h>
-#include <asm/io.h>
+#include <core/io.h>
 
 #define TEXT_ADDR       0xB8000
 #define TEXT_WIDTH      80
