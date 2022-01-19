@@ -5,11 +5,11 @@ SYSROOT_ISO=build/sysroot.iso
 $(LIMINE):
 	make -C deps/limine
 
-$(SYSROOT): src/sysroot/limine.cfg $(KERNEL_BIN)
+$(SYSROOT): sysroot/limine.cfg $(KBIN)
 	$(MKPDIR)
 	mkdir $(SYSROOT)
-	cp src/sysroot/limine.cfg           	$(SYSROOT)/limine.cfg
-	cp $(KERNEL_BIN)                        $(SYSROOT)/kernel.elf
+	cp sysroot/limine.cfg           		$(SYSROOT)/limine.cfg
+	cp $(KBIN)                        		$(SYSROOT)/kernel.elf
 	cp deps/limine/limine.sys               $(SYSROOT)/limine.sys
 	cp deps/limine/limine-cd.bin            $(SYSROOT)/limine-cd.bin
 	cp deps/limine/limine-eltorito-efi.bin  $(SYSROOT)/limine-eltorito-efi.bin

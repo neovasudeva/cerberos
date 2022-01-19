@@ -1,23 +1,25 @@
+#include <core/io.h> 
 #include "com.h"
 
 void com_putc(uint16_t com, const char c) {
-    while ((inb(SERIAL_LINE_COMMAND_PORT(com)) & 0x20) == 0) {}
     outb(SERIAL_DATA_PORT(com), c);
+}
+
+void _com_putc(const char c) {
+    com_putc(SERIAL_COM1, c);
 }
 
 void com_write(uint16_t com, const char* buf, uint32_t len) {
     for (uint32_t i = 0; i < len; i++) {
-        outb(SERIAL_DATA_PORT(com), buf[i]);
+        com_putc(com, buf[i]);
     }
 }
 
-void com_log(const char* buf) {
+void _com_write(char* buf) {
     int i = 0;
-    uint8_t c = buf[i];
-    while (c != '\0') {
-        outb(SERIAL_DATA_PORT(SERIAL_COM1), c);
+    while (buf[i] != '\0') {
+        _com_putc(buf[i]);
         i++; 
-        c = buf[i];
     }
 }
 

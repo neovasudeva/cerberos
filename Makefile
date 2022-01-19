@@ -9,16 +9,17 @@ CFLAGS?= \
 	-std=gnu11 \
 	-Wall \
 	-Wextra \
-	-O2 \
 	-pipe \
 	-g \
-	-ggdb
+	-ggdb \
+	-O2 
 
 KCFLAGS= \
 	$(CFLAGS) \
 	-Ideps				 \
 	-Isrc/kernel/include \
 	-Isrc/lib			 \
+	-Isrc/log			 \
 	-ffreestanding       \
 	-fno-stack-protector \
 	-fno-pic             \
@@ -45,8 +46,8 @@ KASMFLAGS= \
 
 MKPDIR=mkdir -p $(@D)
 
-include src/kernel/.build.mk
-include src/sysroot/.build.mk
+include src/.build.mk
+include sysroot/.build.mk
 
 QEMUFLAGS= \
 	-m 512 \

@@ -13,6 +13,8 @@ void* memcpy(void* dest, const void* src, size_t num) {
     for (size_t i = 0; i < num; i++) {                                                               
         d[i] = s[i];                                                                                 
     }                                                                                                
+
+    return dest;
 }                                                                                                    
                                                                                                      
 /*                                                                                                   
@@ -34,8 +36,25 @@ void* memmove(void* dest, const void* src, size_t num) {
                                                                                                      
     for (size_t i = 0; i < num; i++) {                                                               
         d[i] = temp[i];                                                                              
-    }                                                                                                
+    }
+
+    return dest;                                                                            
 }                           
+
+/*                                                                                                   
+ * memset
+ * sets n bytes of memory in buf to c
+ * @param buf: memory buffer                                                               
+ * @param c: data to set memory to                                                                
+ * @param n: number of bytes to set
+ */                                                                                                  
+void memset(void* buf, int c, size_t n) {
+    char* b = (char*) buf;
+    for (size_t i = 0; i < n; i++) {
+        b[i] = (char) c;
+    }
+}
+
 
 /*                                                                                                   
  * strcpy                                                                                            

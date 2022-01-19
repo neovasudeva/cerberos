@@ -1,7 +1,6 @@
 #pragma once
 
 #include <stdint.h>
-#include <core/io.h> // fix me
 
 /*
  * serial I/O
@@ -27,7 +26,8 @@
 #define SERIAL_ENABLE_DLB               0x80
 
 void com_putc(uint16_t com, const char c);
+void _com_putc(const char c);
 void com_write(uint16_t com, const char* buf, uint32_t len);
-void com_log(const char* buf);
+void _com_write(char* buf);
 void _com_init(uint16_t com, uint16_t divisor);
 void com_init(void);
