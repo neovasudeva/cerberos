@@ -26,8 +26,8 @@
 #define SERIAL_ENABLE_DLB               0x80
 
 void com_putc(uint16_t com, const char c);
-void _com_putc(const char c);
+void __com_putc(const char c);
 void com_write(uint16_t com, const char* buf, uint32_t len);
-void _com_write(char* buf);
-void _com_init(uint16_t com, uint16_t divisor);
+void __com_write(char* buf);
+void __com_init(uint16_t com, uint16_t divisor);
 void com_init(void);

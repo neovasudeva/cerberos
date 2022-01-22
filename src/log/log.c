@@ -1,23 +1,91 @@
+#include <core/utils/utils.h>
 #include <string/string.h>
 #include <stdarg.h>
+#include <core/macros.h>
 
 #include "log.h"
 #include "com.h"
 
+/* 
+ * the following are handlers 
+ * each prints and returns the update to perc 
+ */
+
+static inline bool parse_p(bool perc) {
+    if (perc) {
+        __com_putc('%');
+    }
+    return !perc;
+}
+
+static inline bool parse_xu(bool perc, int64_t val, char op) {
+    char temp[64];
+    memset(temp, 0, 64);
+    
+    if (perc) {
+        if (op == 'x') {
+            itoa(val, temp, 16, UNSIGNED);
+        } else if (op == 'u') {
+            itoa(val, temp, 10, UNSIGNED);
+        }
+        __com_write(temp);
+    } else {
+        __com_putc(op);
+    }
+
+    return false;
+}
+
+static inline bool parse_d(bool perc, int64_t val) {
+    char temp[64];
+    memset(temp, 0, 64);
+    
+    if (perc) {
+        itoa(val, temp, 10, SIGNED);
+        __com_write(temp);
+    } else {
+        __com_putc('d');
+    }
+
+    return false;
+}
+
+static inline bool parse_c(bool perc, char c) {
+    if (perc) {
+        __com_putc(c);
+    } else {
+        __com_putc('c');
+    }
+
+    return false;
+}
+
+static inline bool parse_s(bool perc, char* str) {
+    if (perc) {
+        __com_write(str);
+    } else {
+        __com_putc('s');
+    }
+
+    return false;
+}
+
+/* print log level */
 void print_level(log_level_t level) {
-    /* print log level */
     switch (level) {
         case LOG_INFO:
-            _com_write("[INFO]: ");
+            __com_write("[INFO]: ");
             break;
         case LOG_TODO: 
-            _com_write("[TODO]: ");
+            __com_write("[TODO]: ");
             break;
         case LOG_ERROR:
-            _com_write("[ERROR]: ");
+            __com_write("[ERROR]: ");
+            break;
+        case NONE:
             break;
         default:
-            _com_write("[... no log level ...] ");
+            __com_write("[... no log level ...] ");
     }
 }
 
@@ -39,70 +107,36 @@ void log(log_level_t level, char* format, ...) {
 
     va_list args;
     va_start(args, format);
-    
+
     /* '%' detected while parsing */
     bool perc = false;
     char* buf = format;
+    void* curr_arg;
 
     while (*buf != '\0') {
         switch (*buf) {
             case '%':
-                if (perc) {
-                    _com_putc('%');
-                }
-                perc = !perc;
+                perc = parse_p(perc);
                 break;
             case 'x':
-                if (perc) {
-                    char temp[64];
-                    memset(temp, 0, 64);
-                    itoa(va_arg(args, uint64_t), temp, 16);
-                    _com_write(temp);
-                    perc = false;
-                } else {
-                    _com_putc('x');
-                }
-                break;
             case 'u':
-                if (perc) {
-                    char temp[64];
-                    memset(temp, 0, 64);
-                    itoa(va_arg(args, uint64_t), temp, 10);
-                    _com_write(temp);
-                    perc = false;
-                } else {
-                    _com_putc('u');
-                }
+                if (perc) curr_arg = (uint64_t) va_arg(args, unsigned int);
+                perc = parse_xu(perc, (uint64_t) curr_arg, *buf);
                 break;
             case 'd':
-                if (perc) {
-                    char temp[64];
-                    memset(temp, 0, 64);
-                    itoa(va_arg(args, int64_t), temp, 10);
-                    _com_write(temp);
-                    perc = false;
-                } else {
-                    _com_putc('d');
-                }
+                if (perc) curr_arg = (int64_t) va_arg(args, int);
+                perc = parse_d(perc, (int64_t) curr_arg);
                 break;
             case 'c':
-                if (perc) {
-                    _com_putc((char) va_arg(args, int));
-                    perc = false;
-                } else {
-                    _com_putc('c');
-                }
+                if (perc) curr_arg = (int64_t) va_arg(args, int);
+                perc = parse_c(perc, (char) curr_arg);
                 break;
             case 's':
-                if (perc) {
-                    _com_write((char*) va_arg(args, int*));
-                    perc = false;
-                } else {
-                    _com_putc('s');
-                }
+                if (perc) curr_arg = (int64_t) va_arg(args, int);
+                perc = parse_s(perc, (char*) curr_arg);
                 break;
             default:
-                _com_putc(*buf);
+                __com_putc(*buf);
         }
 
         buf++;

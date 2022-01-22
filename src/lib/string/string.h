@@ -9,7 +9,4 @@ void memset(void* buf, int c, size_t n);
 char* strcpy(char* dest, const char* src);
 size_t strlen(const char* src);
 
-/* not in ANSI C */
-char* itoa(int value, char* str, int base);
-
 /* more to come ... */

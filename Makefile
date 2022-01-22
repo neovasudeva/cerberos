@@ -12,7 +12,7 @@ CFLAGS?= \
 	-pipe \
 	-g \
 	-ggdb \
-	-O2 
+	#-O2 
 
 KCFLAGS= \
 	$(CFLAGS) \
@@ -50,7 +50,7 @@ include src/.build.mk
 include sysroot/.build.mk
 
 QEMUFLAGS= \
-	-m 512 \
+	-m 2G \
 	-smp 1 \
 	-drive format=raw,media=cdrom,file=$(SYSROOT_ISO) \
 	-serial stdio \

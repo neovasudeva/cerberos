@@ -5,7 +5,7 @@ void com_putc(uint16_t com, const char c) {
     outb(SERIAL_DATA_PORT(com), c);
 }
 
-void _com_putc(const char c) {
+void __com_putc(const char c) {
     com_putc(SERIAL_COM1, c);
 }
 
@@ -15,15 +15,15 @@ void com_write(uint16_t com, const char* buf, uint32_t len) {
     }
 }
 
-void _com_write(char* buf) {
+void __com_write(char* buf) {
     int i = 0;
     while (buf[i] != '\0') {
-        _com_putc(buf[i]);
+        __com_putc(buf[i]);
         i++; 
     }
 }
 
-void _com_init(uint16_t com, uint16_t divisor) {
+void __com_init(uint16_t com, uint16_t divisor) {
     /* establish baud rate */
     outb(SERIAL_LINE_COMMAND_PORT(com), SERIAL_ENABLE_DLB);
     outb(SERIAL_DATA_PORT(com), divisor & 0xFF);
@@ -40,5 +40,5 @@ void _com_init(uint16_t com, uint16_t divisor) {
 }
 
 void com_init(void) {
-    _com_init(SERIAL_COM1, 3);
+    __com_init(SERIAL_COM1, 3);
 }
