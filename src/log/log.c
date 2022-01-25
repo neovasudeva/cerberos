@@ -92,7 +92,11 @@ void print_level(log_level_t level) {
 /*
  * log
  *
- * This implementation is very ugly. Please clean up later
+ * When passing in numeric values to log, please use long and 
+ * unsigned long suffixes (ex. 69l) or cast to int64_t or 
+ * uint64_t respectively
+ * 
+ * TODO: remove warnings 
  * 
  * All integer values are assumed to be int64_t
  * %% = print '%'
@@ -120,19 +124,19 @@ void log(log_level_t level, char* format, ...) {
                 break;
             case 'x':
             case 'u':
-                if (perc) curr_arg = (uint64_t) va_arg(args, unsigned int);
+                if (perc) curr_arg = (void*) va_arg(args, uint64_t);
                 perc = parse_xu(perc, (uint64_t) curr_arg, *buf);
                 break;
             case 'd':
-                if (perc) curr_arg = (int64_t) va_arg(args, int);
+                if (perc) curr_arg = (void*) va_arg(args, int64_t);
                 perc = parse_d(perc, (int64_t) curr_arg);
                 break;
             case 'c':
-                if (perc) curr_arg = (int64_t) va_arg(args, int);
+                if (perc) curr_arg = (void*) va_arg(args, int);
                 perc = parse_c(perc, (char) curr_arg);
                 break;
             case 's':
-                if (perc) curr_arg = (int64_t) va_arg(args, int);
+                if (perc) curr_arg = va_arg(args, void*);
                 perc = parse_s(perc, (char*) curr_arg);
                 break;
             default:
