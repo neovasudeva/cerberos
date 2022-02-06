@@ -1,4 +1,4 @@
-#include "stivale2.h"
+#include <boot/stivale2.h>
 
 /* 
  * for more information:

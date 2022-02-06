@@ -1,13 +1,13 @@
 KERNEL_C_SRC+= \
 	$(wildcard src/kernel/boot/*.c) \
 	$(wildcard src/kernel/cpu/*.c) \
-	$(wildcard src/kernel/device/*.c) \
-	$(wildcard src/kernel/mem/*.c) 
+	$(wildcard src/kernel/dev/*.c) \
+	$(wildcard src/kernel/mm/*.c) 
 
 KERNEL_S_SRC+= \
 	$(wildcard src/kernel/boot/*.S) \
 	$(wildcard src/kernel/cpu/*.S) \
-	$(wildcard src/kernel/device/*.S) 
+	$(wildcard src/kernel/dev/*.S) 
 
 KERNEL_DEPS=$(KERNEL_C_SRC:.c=.d)
 

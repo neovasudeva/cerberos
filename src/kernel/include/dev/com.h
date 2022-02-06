@@ -28,6 +28,6 @@
 void com_putc(uint16_t com, const char c);
 void __com_putc(const char c);
 void com_write(uint16_t com, const char* buf, uint32_t len);
-void __com_write(char* buf);
+void __com_puts(char* buf);
 void __com_init(uint16_t com, uint16_t divisor);
 void com_init(void);

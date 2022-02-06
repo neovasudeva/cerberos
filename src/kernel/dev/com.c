@@ -1,5 +1,5 @@
 #include <core/io.h> 
-#include "com.h"
+#include <dev/com.h>
 
 void com_putc(uint16_t com, const char c) {
     outb(SERIAL_DATA_PORT(com), c);
@@ -15,7 +15,7 @@ void com_write(uint16_t com, const char* buf, uint32_t len) {
     }
 }
 
-void __com_write(char* buf) {
+void __com_puts(char* buf) {
     int i = 0;
     while (buf[i] != '\0') {
         __com_putc(buf[i]);

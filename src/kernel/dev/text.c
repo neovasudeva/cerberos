@@ -1,4 +1,4 @@
-#include "text.h"
+#include <dev/text.h>
 
 void text_write(uint16_t loc, uint8_t c, uint8_t fg, uint8_t bg) {
     uint16_t* text_buffer = (uint16_t*) TEXT_ADDR;
