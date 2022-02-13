@@ -1,4 +1,4 @@
-#include "bitmap.h"
+#include <ds/bitmap.h>
 
 bitmap_t bitmap_create(size_t size, uint8_t* data) {
     return (bitmap_t) { .size = size, .data = data };

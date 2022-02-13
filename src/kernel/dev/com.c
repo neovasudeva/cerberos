@@ -1,4 +1,4 @@
-#include <core/io.h> 
+#include <sys/io.h> 
 #include <dev/com.h>
 
 void com_putc(uint16_t com, const char c) {

@@ -1,4 +1,4 @@
-#include <core/io.h>
+#include <sys/io.h>
 #include <dev/pic.h>
 
 void pic_init() {

@@ -1,8 +1,7 @@
 #include <stdarg.h>
-#include <core/utils/utils.h>
-#include <core/macros.h>
 #include <dev/com.h>
-#include <string/string.h>
+#include <sys/macros.h>
+#include <mem/mem.h>
 
 #include "log.h"
 

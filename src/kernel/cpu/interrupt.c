@@ -1,5 +1,5 @@
-#include <core/asm.h>
-#include <core/macros.h>
+#include <sys/asm.h>
+#include <sys/macros.h>
 
 #include <cpu/interrupt.h>
 #include <cpu/idt.h>

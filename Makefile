@@ -18,7 +18,7 @@ KCFLAGS= \
 	$(CFLAGS) \
 	-Ideps				 \
 	-Isrc/kernel/include \
-	-Isrc/lib			 \
+	-Isrc/lib/include	 \
 	-Isrc/log			 \
 	-ffreestanding       \
 	-fno-stack-protector \

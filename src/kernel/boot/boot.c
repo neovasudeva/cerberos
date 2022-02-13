@@ -1,6 +1,6 @@
 #include <stdint.h>
-#include <core/macros.h>
-#include <core/asm.h>
+#include <sys/macros.h>
+#include <sys/asm.h>
 #include <log.h>
 
 #include <boot/stivale2.h>
@@ -16,11 +16,11 @@
  * entry point for kernel 
  */
 void _start(struct stivale2_struct *handover) {
-    UNUSED(handover);
     com_init();
     gdt_init();
     idt_init();
     pic_disable();
+    pmm_init(handover);
 
     /*
     int64_t out;

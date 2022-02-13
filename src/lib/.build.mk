@@ -1,5 +1,6 @@
 LIB_C_SRC+= \
-	$(wildcard src/lib/string/*.c) 
+	$(wildcard src/lib/ds/*.c) \
+	$(wildcard src/lib/mem/*.c) 
 
 LIB_DEPS=$(LIB_C_SRC:.c=.d)
 

@@ -1,4 +1,4 @@
-#include "string.h"
+#include <mem/mem.h>
 
 /*                                                                                                   
  * memcpy                                                                                            
