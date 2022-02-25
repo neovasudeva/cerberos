@@ -1,6 +1,5 @@
 #include <stdint.h>
-#include <sys/macros.h>
-#include <sys/asm.h>
+#include <sys/sys.h>
 #include <log.h>
 
 #include <boot/stivale2.h>
@@ -10,7 +9,7 @@
 #include <dev/kbd.h>
 #include <cpu/gdt.h>
 #include <cpu/idt.h>
-#include <mm/pmm.h>
+#include <mm/memmap.h>
 
 /*
  * entry point for kernel 
@@ -20,7 +19,9 @@ void _start(struct stivale2_struct *handover) {
     gdt_init();
     idt_init();
     pic_disable();
-    pmm_init(handover);
+
+    memmap_t* mmap = get_memmap(handover);
+    print_memmap(mmap);
 
     /*
     int64_t out;

@@ -1,7 +1,8 @@
 #pragma once
 
-#define panic() \
-    log("panic at the disco! looks like %s:%d shat the bed :(\n", __FILE__, __LINE__); \
-    for (;;;) { \
+#define panic(msg, ...) \
+    log("kernel panic at the disco! Panic message:\n"); \
+    log(msg, ## __VA_ARGS__);   \
+    for (;;) { \
         hlt();  \
     }           

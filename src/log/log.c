@@ -1,6 +1,6 @@
 #include <stdarg.h>
 #include <dev/com.h>
-#include <sys/macros.h>
+#include <sys/sys.h>
 #include <mem/mem.h>
 
 #include "log.h"
