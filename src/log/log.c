@@ -14,7 +14,7 @@ static inline void print_x(int32_t val) {
     char buf[9];
     buf[8] = '\0';
 
-    char* digits = "0123456789ABCDEF";
+    char* digits = "0123456789abcdef";
     for (int i = 7; i >= 0; i--) {
         buf[i] = digits[val & 0xF]; 
         val >>= 4;
@@ -27,7 +27,7 @@ static inline void print_lx(int64_t val) {
     char buf[17];
     buf[16] = '\0';
 
-    char* digits = "0123456789ABCDEF";
+    char* digits = "0123456789abcdef";
     for (int i = 15; i >= 0; i--) {
         buf[i] = digits[val & 0xF]; 
         val >>= 4;

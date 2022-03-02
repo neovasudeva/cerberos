@@ -10,18 +10,17 @@
 #include <cpu/gdt.h>
 #include <cpu/idt.h>
 #include <mm/memmap.h>
+#include <mm/pmm.h>
 
 /*
  * entry point for kernel 
  */
-void _start(struct stivale2_struct *handover) {
+void _start(boot_info_t* handover) {
     com_init();
     gdt_init();
     idt_init();
     pic_disable();
-
-    memmap_t* mmap = get_memmap(handover);
-    print_memmap(mmap);
+    pmm_init(handover);
 
     /*
     int64_t out;

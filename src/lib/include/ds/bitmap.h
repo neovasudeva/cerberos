@@ -8,7 +8,8 @@
 #define get_bit_index(bit) (bit % 8)
 
 typedef struct {
-    size_t size;    // size in bits 
+    size_t size;            // size in bits 
+    size_t first_free_idx;
     uint8_t* data;
 } bitmap_t;
 
