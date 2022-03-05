@@ -5,8 +5,8 @@
 #define ALIGN_UP(addr, align)       (void*) ((addr + align - 1) & ~(align - 1))
 #define BITS2BYTES(bits)            ((bits / 8) + (bits % 8 ? 1 : 0))
 
-#define MIN(a, b)   (a < b) ? a : b
-#define MAX(a, b)   (a > b) ? a : b
+#define MIN(a, b)   ((a < b) ? (a) : (b))
+#define MAX(a, b)   ((a > b) ? (a) : (b))
 
 typedef uint64_t paddr_t;
 typedef uint64_t vaddr_t;

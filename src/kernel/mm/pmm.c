@@ -1,5 +1,4 @@
 #include <mem/mem.h>
-#include <ds/bitmap.h>
 #include <mm/pmm.h>
 
 /* static area for allocating buddy system structures */
@@ -13,48 +12,111 @@ static inline uint8_t* alloc(size_t size, size_t align) {
     return ret;
 }
 
-/* memory usage stats */
-static uint64_t kmem_used = 0;
-static uint64_t kmem_free = 0;
-static uint64_t kmem_total = 0;
+/* memory bookkeeping */
+static size_t mem_size = 0;
 
-/* pmm bitmaps */
+/* zone information */
 /* NOTE: offsets must be 4KiB aligned */
-static bitmap_t pmm_bitmap[PMM_NUM_ZONES];
-static paddr_t zone_offset[PMM_NUM_ZONES] = {
-    [PMM_ZONE_DMA] = 0,           // DMA: 0 MiB - 16 MiB 
-    [PMM_ZONE_NORMAL] = 16 * MiB  // NORMAL: 16 MiB - end of memory
+static zone_t mem_zone[PMM_NUM_ZONES] = {
+    // DMA: 0 MiB - 16 MiB
+    [PMM_ZONE_DMA] = {
+        .mem_total = (size_t) -1,
+        .mem_free = (size_t) -1,
+        .mem_used = (size_t) -1,
+        .offset = 0,
+        .bitmap = { .size = (size_t) -1, .data = NULL },
+        .first_free_idx = (size_t) -1,
+        .zone = PMM_ZONE_DMA
+    },
+
+    // NORMAL: 16 MiB - end of memory
+    [PMM_ZONE_NORMAL] = {
+        .mem_total = (size_t) -1,
+        .mem_free = (size_t) -1,
+        .mem_used = (size_t) -1,
+        .offset = (16 * MiB),
+        .bitmap = { .size = (size_t) -1, .data = NULL },
+        .first_free_idx = (size_t) -1,
+        .zone = PMM_ZONE_NORMAL
+    }
 };
+
+/* print zone mem stats */
+static inline void print_mem_stats(void) {
+    log("\n");
+    for (zone_enum_t zone = 0; zone < PMM_NUM_ZONES; zone++) {
+        log("zone: %lu\n", mem_zone[zone].zone);
+        log("mem_total: %lx\n", mem_zone[zone].mem_total);
+        log("mem_free: %lx\n", mem_zone[zone].mem_free);
+        log("mem_used: %lx\n", mem_zone[zone].mem_used);
+        log("offset: %lx\n", mem_zone[zone].offset);
+        log("first_free_idx: %lx\n", mem_zone[zone].first_free_idx);
+        log("\n");
+    }
+}
 
 /* 
  * allocate physical page frames 
  * @param zone : zone to allocate in 
  * @param size : num pages to allocate 
  */
-paddr_t pmm_alloc(zone_t zone, size_t size) {
-    size_t first_free_idx = pmm_bitmap[zone].first_free_idx;
-    //for (; first_free_idx < pmm_bitmap[zone].size; first_free_idx++) {
-    //    
-    //}
-    UNUSED(first_free_idx);
-    UNUSED(size);
+paddr_t pmm_alloc(zone_enum_t zone, size_t size) {
+    size_t idx = bitmap_find_range(&mem_zone[zone].bitmap, mem_zone[zone].first_free_idx, PMM_FREE, size);
 
-    return -1;
+    if (idx == (size_t) -1)
+        panic("pmm_alloc could not find %lu of free pages.", size);
+    
+    bitmap_set_range(&mem_zone[zone].bitmap, idx, size);
+
+    // update zone bookkeeping
+    mem_zone[zone].mem_free -= size * PMM_PAGE_SIZE;
+    mem_zone[zone].mem_used += size * PMM_PAGE_SIZE;
+    mem_zone[zone].first_free_idx = idx + size;
+
+    return mem_zone[zone].offset + (PMM_PAGE_SIZE * idx);
 }
 
+/* 
+ * free physical page frames 
+ * @param addr : PMM_PAGE_SIZE aligned physical addr to free 
+ * @param size : num pages to free
+ */
 void pmm_free(paddr_t addr, size_t size) {
-    UNUSED(addr);
-    UNUSED(size);
+    // find zone
+    zone_enum_t zone = 0;
+    for ( ; zone < PMM_NUM_ZONES; zone++) {
+        if (zone + 1 == PMM_NUM_ZONES) {
+            if (addr >= mem_zone[zone].offset && addr < mem_size) 
+                break;
+        } else {
+            if (addr >= mem_zone[zone].offset && addr < mem_zone[zone + 1].offset)
+                break;
+        }
+    }
+
+    // verify a zone was found
+    if (zone == PMM_NUM_ZONES)
+        panic("pmm_free could not identify the zone for addr %lx.\n", addr);
+
+    // free the pages
+    size_t idx = (addr - mem_zone[zone].offset) / PMM_PAGE_SIZE;
+    bitmap_clear_range(&mem_zone[zone].bitmap, idx, size);
+    
+    // update zone bookkeeping
+    mem_zone[zone].mem_free += size * PMM_PAGE_SIZE;
+    mem_zone[zone].mem_used -= size * PMM_PAGE_SIZE;
+    if (idx < mem_zone[zone].first_free_idx)
+        mem_zone[zone].first_free_idx = idx;
 }
 
 /* 
  * set region as unused 
- * @param zone : zone to allocate in
+ * @param zone : zone the bitmap is in
  * @param bit : bit within bitmap to start clearing
  * @param size : num bits to clearing 
  */
-static void pmm_set_unused(zone_t zone, size_t bit, size_t size) {
-    bitmap_clear_range(&pmm_bitmap[zone], bit, size);
+static inline void pmm_set_unused(zone_enum_t zone, size_t bit, size_t size) {
+    bitmap_clear_range(&mem_zone[zone].bitmap, bit, size);
 }
 
 void pmm_init(boot_info_t* handover) {
@@ -63,36 +125,29 @@ void pmm_init(boot_info_t* handover) {
     if (memmap == NULL)
         panic("pmm_init could not find memory map from bootloader.");
 
-    // TODO: remove me
-    print_memmap(memmap);
-
     // verify at least 16 MiB of physical memory is present
-    size_t mem_size = get_mem_size(memmap);
+    mem_size = get_mem_size(memmap);
     if (mem_size < (16 * MiB))
         panic("pmm_init found less than 16 MiB of memory.");
-    
-    // initialize physical memory bookkeeping
-    kmem_total = mem_size;
-    kmem_used = mem_size;
-    kmem_free = 0;
 
-    // initialize zone bitmaps
-    for (int zone = 0; zone < PMM_NUM_ZONES; zone++) {
-        if (zone == PMM_NUM_ZONES - 1) {
-            pmm_bitmap[zone].size = (mem_size - zone_offset[zone]) / PMM_PAGE_SIZE;
-            pmm_bitmap[zone].first_free_idx = (size_t) -1;
-        } else {
-            pmm_bitmap[zone].size = (zone_offset[zone + 1] - zone_offset[zone]) / PMM_PAGE_SIZE;
-            pmm_bitmap[zone].first_free_idx = (size_t) -1;
-        }
+    // initialize zone structs
+    for (zone_enum_t zone = 0; zone < PMM_NUM_ZONES; zone++) {
+        if (zone == PMM_NUM_ZONES - 1) 
+            mem_zone[zone].mem_total = mem_size - mem_zone[zone].offset;
+        else 
+            mem_zone[zone].mem_total = mem_zone[zone + 1].offset - mem_zone[zone].offset;
 
-        // set everything to reserved
-        pmm_bitmap[zone].data = alloc(bitmap_size_bytes(&pmm_bitmap[zone]), 8);
-        bitmap_set_range(&pmm_bitmap[zone], 0, pmm_bitmap[zone].size);
+        mem_zone[zone].mem_used = mem_zone[zone].mem_total;
+        mem_zone[zone].mem_free = 0;
+        mem_zone[zone].bitmap.size = mem_zone[zone].mem_total / PMM_PAGE_SIZE;
+
+        // init bitmaps
+        mem_zone[zone].bitmap.data = alloc(bitmap_size_bytes(&mem_zone[zone].bitmap), 8);
+        bitmap_set_range(&mem_zone[zone].bitmap, 0, mem_zone[zone].bitmap.size);
     }
 
     // use bootloader handover information to set unused regions as usable
-    zone_t curr_zone = PMM_ZONE_DMA;
+    zone_enum_t curr_zone = PMM_ZONE_DMA;
     for (uint64_t i = 0; i < memmap->entries; i++) {
         memmap_entry_t entry = memmap->memmap[i];
         if (entry.type == MEM_USABLE) {
@@ -100,14 +155,14 @@ void pmm_init(boot_info_t* handover) {
             paddr_t entry_end = (paddr_t) ALIGN_DOWN(entry.base + entry.length, 4 * KiB);     // exclusive
 
             // find each zone the entry crosses over
-            paddr_t curr_zone_start = zone_offset[curr_zone];
-            paddr_t curr_zone_end = (curr_zone + 1 == PMM_NUM_ZONES) ? mem_size : zone_offset[curr_zone + 1];
+            paddr_t curr_zone_start = mem_zone[curr_zone].offset; 
+            paddr_t curr_zone_end = (curr_zone + 1 == PMM_NUM_ZONES) ? mem_size : mem_zone[curr_zone + 1].offset; 
 
             // move curr_zone to where the entry starts
             while (curr_zone_end < entry_start) {
                 curr_zone++;
-                curr_zone_start = zone_offset[curr_zone];
-                curr_zone_end = (curr_zone + 1 == PMM_NUM_ZONES) ? mem_size : zone_offset[curr_zone + 1];
+                curr_zone_start = mem_zone[curr_zone].offset; 
+                curr_zone_end = (curr_zone + 1 == PMM_NUM_ZONES) ? mem_size : mem_zone[curr_zone + 1].offset;
             }
 
             while (true) {
@@ -115,8 +170,11 @@ void pmm_init(boot_info_t* handover) {
                 size_t size = (MIN(entry_end, curr_zone_end) - entry_start) / PMM_PAGE_SIZE;
                 pmm_set_unused(curr_zone, idx, size);
 
-                if (idx < pmm_bitmap[curr_zone].first_free_idx)
-                    pmm_bitmap[curr_zone].first_free_idx = idx;
+                // update zone bookkeeping
+                mem_zone[curr_zone].mem_used -= size * PMM_PAGE_SIZE;
+                mem_zone[curr_zone].mem_free += size * PMM_PAGE_SIZE;
+                if (idx < mem_zone[curr_zone].first_free_idx)
+                    mem_zone[curr_zone].first_free_idx = idx;
 
                 // entry is within current zone
                 if (entry_end <= curr_zone_end)
@@ -125,16 +183,10 @@ void pmm_init(boot_info_t* handover) {
                 // entry bleeds into next zone
                 entry_start = MIN(curr_zone_end, entry_end);
                 curr_zone++;
-                curr_zone_start = (curr_zone + 1 > PMM_NUM_ZONES) ? mem_size : zone_offset[curr_zone];
-                curr_zone_end = (curr_zone + 1 >= PMM_NUM_ZONES) ? mem_size : zone_offset[curr_zone + 1];
+                curr_zone_start = (curr_zone + 1 > PMM_NUM_ZONES) ? mem_size : mem_zone[curr_zone].offset; 
+                curr_zone_end = (curr_zone + 1 >= PMM_NUM_ZONES) ? mem_size : mem_zone[curr_zone + 1].offset;
             }
-
-            // update physical memory bookkeeping
-            kmem_used -= entry.length;
-            kmem_free += entry.length;
         }
     }
-
-    log("end\n");
 }
 

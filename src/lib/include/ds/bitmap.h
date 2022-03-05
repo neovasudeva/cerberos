@@ -1,15 +1,10 @@
 #pragma once
 
-#include <stdint.h>
-#include <stddef.h>
-#include <stdbool.h>
-
 #define get_byte_index(bit) (bit / 8)
 #define get_bit_index(bit) (bit % 8)
 
 typedef struct {
     size_t size;            // size in bits 
-    size_t first_free_idx;
     uint8_t* data;
 } bitmap_t;
 
@@ -47,3 +42,5 @@ static inline void bitmap_clear_range(bitmap_t* bitmap, size_t bit, size_t num_b
 static inline size_t bitmap_size_bytes(bitmap_t* bitmap) {
     return (bitmap->size / 8) + (bitmap->size % 8 ? 1 : 0);
 }
+
+size_t bitmap_find_range(bitmap_t* bitmap, size_t first_idx, bool bit, size_t length);
