@@ -1,9 +1,8 @@
 #pragma once
 
 #include <boot/stivale2.h>
-#include <stdint.h>
-#include <log.h>
 #include <sys/sys.h>
+#include <log.h>
 
 #define MEM_USABLE          1
 #define MEM_RESERVED        2
@@ -14,17 +13,12 @@
 #define MEM_KERNEL          0x1001
 #define MEM_FRAMEBUFFER     0x1002
 
-/* fix me */
-typedef struct stivale2_struct              boot_info_t;
-typedef struct stivale2_struct_tag_memmap   memmap_t;
-typedef struct stivale2_mmap_entry          memmap_entry_t;
-
 /* static helper functions */
-static inline void print_memmap(memmap_t* mmap_info) {
+static inline void print_memmap(struct stivale2_struct_tag_memmap* mmap_info) {
     info("Printing memory map ...\n");
 
     uint64_t entries = mmap_info->entries;
-    memmap_entry_t* memmap = mmap_info->memmap;
+    struct stivale2_mmap_entry* memmap = mmap_info->memmap;
 
     for (uint64_t i = 0; i < entries; i++) { 
         log("%d: ", i);
@@ -59,13 +53,13 @@ static inline void print_memmap(memmap_t* mmap_info) {
     }
 }
 
-static inline paddr_t get_mem_size(memmap_t* stivale2_memmap) {
-    memmap_entry_t last = stivale2_memmap->memmap[stivale2_memmap->entries - 1];
+static inline paddr_t get_mem_size(struct stivale2_struct_tag_memmap* stivale2_memmap) {
+    struct stivale2_mmap_entry last = stivale2_memmap->memmap[stivale2_memmap->entries - 1];
     return last.base + last.length;
 }
 
-static inline memmap_t* get_memmap(boot_info_t* handover) {
-    memmap_t* memmap;
+static inline struct stivale2_struct_tag_memmap* get_memmap(struct stivale2_struct* handover) {
+    struct stivale2_struct_tag_memmap* memmap;
     memmap = stivale2_get_tag(handover, STIVALE2_STRUCT_TAG_MEMMAP_ID);
 
     if (memmap == NULL) 

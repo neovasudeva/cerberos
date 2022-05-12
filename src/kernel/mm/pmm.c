@@ -6,7 +6,7 @@ static uint8_t alloc_area[1 * MiB];
 static uint8_t* alloc_ptr = alloc_area;
 
 static inline uint8_t* alloc(size_t size, size_t align) {
-    uint8_t* ret = ALIGN_UP((uint64_t) alloc_ptr, align);
+    uint8_t* ret = (uint8_t*) ALIGN_UP((uint64_t) alloc_ptr, align);
     memset(ret, 0, size);
     alloc_ptr = ret + size;
     return ret;
@@ -44,7 +44,7 @@ static zone_t mem_zone[PMM_NUM_ZONES] = {
 /* print zone mem stats */
 static inline void print_mem_stats(void) {
     log("\n");
-    for (zone_enum_t zone = 0; zone < PMM_NUM_ZONES; zone++) {
+    for (zone_e zone = 0; zone < PMM_NUM_ZONES; zone++) {
         log("zone: %lu\n", mem_zone[zone].zone);
         log("mem_total: %lx\n", mem_zone[zone].mem_total);
         log("mem_free: %lx\n", mem_zone[zone].mem_free);
@@ -60,7 +60,7 @@ static inline void print_mem_stats(void) {
  * @param zone : zone to allocate in 
  * @param size : num pages to allocate 
  */
-paddr_t pmm_alloc(zone_enum_t zone, size_t size) {
+paddr_t pmm_alloc(zone_e zone, size_t size) {
     size_t idx = bitmap_find_range(&mem_zone[zone].bitmap, mem_zone[zone].first_free_idx, PMM_FREE, size);
 
     if (idx == (size_t) -1)
@@ -69,21 +69,21 @@ paddr_t pmm_alloc(zone_enum_t zone, size_t size) {
     bitmap_set_range(&mem_zone[zone].bitmap, idx, size);
 
     // update zone bookkeeping
-    mem_zone[zone].mem_free -= size * PMM_PAGE_SIZE;
-    mem_zone[zone].mem_used += size * PMM_PAGE_SIZE;
+    mem_zone[zone].mem_free -= size * PAGE_SIZE;
+    mem_zone[zone].mem_used += size * PAGE_SIZE;
     mem_zone[zone].first_free_idx = idx + size;
 
-    return mem_zone[zone].offset + (PMM_PAGE_SIZE * idx);
+    return mem_zone[zone].offset + (PAGE_SIZE * idx);
 }
 
 /* 
  * free physical page frames 
- * @param addr : PMM_PAGE_SIZE aligned physical addr to free 
+ * @param addr : PAGE_SIZE aligned physical addr to free 
  * @param size : num pages to free
  */
 void pmm_free(paddr_t addr, size_t size) {
     // find zone
-    zone_enum_t zone = 0;
+    zone_e zone = 0;
     for ( ; zone < PMM_NUM_ZONES; zone++) {
         if (zone + 1 == PMM_NUM_ZONES) {
             if (addr >= mem_zone[zone].offset && addr < mem_size) 
@@ -99,12 +99,12 @@ void pmm_free(paddr_t addr, size_t size) {
         panic("pmm_free could not identify the zone for addr %lx.\n", addr);
 
     // free the pages
-    size_t idx = (addr - mem_zone[zone].offset) / PMM_PAGE_SIZE;
+    size_t idx = (addr - mem_zone[zone].offset) / PAGE_SIZE;
     bitmap_clear_range(&mem_zone[zone].bitmap, idx, size);
     
     // update zone bookkeeping
-    mem_zone[zone].mem_free += size * PMM_PAGE_SIZE;
-    mem_zone[zone].mem_used -= size * PMM_PAGE_SIZE;
+    mem_zone[zone].mem_free += size * PAGE_SIZE;
+    mem_zone[zone].mem_used -= size * PAGE_SIZE;
     if (idx < mem_zone[zone].first_free_idx)
         mem_zone[zone].first_free_idx = idx;
 }
@@ -115,13 +115,13 @@ void pmm_free(paddr_t addr, size_t size) {
  * @param bit : bit within bitmap to start clearing
  * @param size : num bits to clearing 
  */
-static inline void pmm_set_unused(zone_enum_t zone, size_t bit, size_t size) {
+static inline void pmm_set_unused(zone_e zone, size_t bit, size_t size) {
     bitmap_clear_range(&mem_zone[zone].bitmap, bit, size);
 }
 
-void pmm_init(boot_info_t* handover) {
+void pmm_init(struct stivale2_struct* handover) {
     // get memory map information from bootloader
-    memmap_t* memmap = get_memmap(handover);
+    struct stivale2_struct_tag_memmap* memmap = get_memmap(handover);
     if (memmap == NULL)
         panic("pmm_init could not find memory map from bootloader.");
 
@@ -131,7 +131,7 @@ void pmm_init(boot_info_t* handover) {
         panic("pmm_init found less than 16 MiB of memory.");
 
     // initialize zone structs
-    for (zone_enum_t zone = 0; zone < PMM_NUM_ZONES; zone++) {
+    for (zone_e zone = 0; zone < PMM_NUM_ZONES; zone++) {
         if (zone == PMM_NUM_ZONES - 1) 
             mem_zone[zone].mem_total = mem_size - mem_zone[zone].offset;
         else 
@@ -139,7 +139,7 @@ void pmm_init(boot_info_t* handover) {
 
         mem_zone[zone].mem_used = mem_zone[zone].mem_total;
         mem_zone[zone].mem_free = 0;
-        mem_zone[zone].bitmap.size = mem_zone[zone].mem_total / PMM_PAGE_SIZE;
+        mem_zone[zone].bitmap.size = mem_zone[zone].mem_total / PAGE_SIZE;
 
         // init bitmaps
         mem_zone[zone].bitmap.data = alloc(bitmap_size_bytes(&mem_zone[zone].bitmap), 8);
@@ -147,9 +147,9 @@ void pmm_init(boot_info_t* handover) {
     }
 
     // use bootloader handover information to set unused regions as usable
-    zone_enum_t curr_zone = PMM_ZONE_DMA;
+    zone_e curr_zone = PMM_ZONE_DMA;
     for (uint64_t i = 0; i < memmap->entries; i++) {
-        memmap_entry_t entry = memmap->memmap[i];
+        struct stivale2_mmap_entry entry = memmap->memmap[i];
         if (entry.type == MEM_USABLE) {
             paddr_t entry_start = (paddr_t) ALIGN_UP(entry.base, 4 * KiB);                    // inclusive 
             paddr_t entry_end = (paddr_t) ALIGN_DOWN(entry.base + entry.length, 4 * KiB);     // exclusive
@@ -166,13 +166,13 @@ void pmm_init(boot_info_t* handover) {
             }
 
             while (true) {
-                size_t idx = (entry_start - curr_zone_start) / PMM_PAGE_SIZE;
-                size_t size = (MIN(entry_end, curr_zone_end) - entry_start) / PMM_PAGE_SIZE;
+                size_t idx = (entry_start - curr_zone_start) / PAGE_SIZE;
+                size_t size = (MIN(entry_end, curr_zone_end) - entry_start) / PAGE_SIZE;
                 pmm_set_unused(curr_zone, idx, size);
 
                 // update zone bookkeeping
-                mem_zone[curr_zone].mem_used -= size * PMM_PAGE_SIZE;
-                mem_zone[curr_zone].mem_free += size * PMM_PAGE_SIZE;
+                mem_zone[curr_zone].mem_used -= size * PAGE_SIZE;
+                mem_zone[curr_zone].mem_free += size * PAGE_SIZE;
                 if (idx < mem_zone[curr_zone].first_free_idx)
                     mem_zone[curr_zone].first_free_idx = idx;
 

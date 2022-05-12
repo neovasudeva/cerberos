@@ -134,6 +134,9 @@ void print_level(log_level_t level) {
         case ERROR:
             __com_puts("[ERROR]: ");
             break;
+        case WARNING:
+            __com_puts("[WARNING]: ");
+            break;
         case NONE:
             break;
         default:

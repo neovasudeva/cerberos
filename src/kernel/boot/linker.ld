@@ -1,32 +1,45 @@
 /*
  * for more information:
  * https://wiki.osdev.org/Stivale_Bare_Bones
+ * https://stackoverflow.com/questions/14361248/whats-the-difference-of-section-and-segment-in-elf-file-format
  */
 
 ENTRY(_start)
- 
+
+PHDRS
+{
+    null    PT_NULL    FLAGS(0) ;                   /* Null segment */
+    text    PT_LOAD    FLAGS((1 << 0) | (1 << 2)) ; /* Execute + Read */
+    rodata  PT_LOAD    FLAGS((1 << 2)) ;            /* Read only */
+    data    PT_LOAD    FLAGS((1 << 1) | (1 << 2)) ; /* Write + Read */
+}
+
 SECTIONS
 {
     . = 0xffffffff80000000;
 
-    .stivale2hdr : {
-        KEEP(*(.stivale2hdr))
-    }
- 
     .text : {
         *(.text .text.*)
-    } 
+    } :text
+
+    . += CONSTANT(MAXPAGESIZE);
+
+    .stivale2hdr : {
+        KEEP(*(.stivale2hdr))
+    } :rodata
  
     .rodata : {
         *(.rodata .rodata.*)
-    } 
+    } :rodata
+
+    . += CONSTANT(MAXPAGESIZE);
  
     .data : {
         *(.data .data.*)
-    } 
+    } :data
  
     .bss : {
         *(COMMON)
         *(.bss .bss.*)
-    } 
+    } :data
 }

@@ -9,3 +9,4 @@
 #include <sys/misc.h>
 #include <sys/io.h>
 #include <sys/panic.h>
+#include <sys/cpuid.h>

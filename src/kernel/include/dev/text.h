@@ -1,9 +1,9 @@
 #pragma once
 
-#include <stdint.h>
-#include <sys/io.h>
+#include <sys/sys.h>
+#include <mm/mem.h>
 
-#define TEXT_ADDR       0xB8000
+#define TEXT_ADDR       (0xB8000 + VA_HHDM)
 #define TEXT_WIDTH      80
 #define TEXT_HEIGHT     25
 
