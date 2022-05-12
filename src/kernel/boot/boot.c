@@ -23,8 +23,6 @@ void _start(struct stivale2_struct* handover) {
     pmm_init(handover);
     kvm_init(handover);
 
-    text_write(0, 'h', GREEN, RED);
-
     for (;;) {
         hlt();
     }

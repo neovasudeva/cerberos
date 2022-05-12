@@ -2,6 +2,7 @@
 #include <mm/pmm.h>
 #include <mm/paging.h>
 #include <mm/memmap.h>
+#include <cpu/interrupt.h>
 
 #include <log.h>
 
@@ -31,6 +32,9 @@ void kvm_init(struct stivale2_struct* handover) {
         panic("stivale2 memmap tag not found");
 
     print_memmap(memmap);
+
+    // register page fault interrupt handler
+    register_intr_handler(&wrapper_page_fault_intr_handler, PAGE_FAULT_IRQ_VEC);
     
     // create pml4 table
     pml_table_t* pml4_table = paging_create();
@@ -54,7 +58,7 @@ void kvm_init(struct stivale2_struct* handover) {
         if (entry.permissions & STIVALE2_PMR_WRITABLE) 
             flags |= PAGE_WRITABLE;
 
-        log("[kvm_init] ventry 0x%lx, pentry 0x%lx, num 0x%lx, flags 0x%lx\n", ventry, pentry, num, flags);
+        // log("[kvm_init] ventry 0x%lx, pentry 0x%lx, num 0x%lx, flags 0x%lx\n", ventry, pentry, num, flags);
         __paging_maps(pml4_table, ventry, pentry, num, flags);
     }
 
@@ -77,11 +81,13 @@ void kvm_init(struct stivale2_struct* handover) {
     // TODO: make these global pages
     __paging_map(pml4_table, KHEAP_INIT_VADDR, pmm_alloc(PMM_ZONE_NORMAL, 1), PAGE_PRESENT | PAGE_WRITABLE);
 
-    log("neo!\n");
-
     // TODO: map (map singular page up until 16 MiB) kernel eternal heap?
     // TODO: make these global pages
 
     // load new mappings to cr3
     load_cr3(pml4_table);
+
+    uint64_t* kheap = (uint64_t*) (0xffffffffffffffff - 16 + 1); 
+    *kheap = 10;
+    log("addr: 0x%lx, data: 0x%lx\n", kheap, *kheap);
 }

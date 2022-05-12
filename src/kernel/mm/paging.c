@@ -1,8 +1,52 @@
 #include <mm/paging.h>
 #include <mm/pmm.h>
+#include <cpu/interrupt.h>
 
-void paging_intr_handler(void) {
+/*
+ * page_fault_intr_handler
+ * All information about error code for page fault handler is in section 4.7 in Intel docs
+ * Linear address taht caused fault in CR2: https://wiki.osdev.org/CPU_Registers_x86-64#CR2
+ * @param cpu_state: state of regs
+ */
+void page_fault_intr_handler(cpu_state_t regs) {
+    // linear address that caused fault
+    uint64_t cr2;
+    dump_cr2(cr2);
+    log("[page_fault_intr_handler] linear address that caused fault: 0x%lx\n", cr2);
 
+    uint64_t error_code = regs.error_code;
+    log("[page_fault_intr_handler] error code: 0x%lx\n", regs.error_code);
+    
+    // present bit
+    if (error_code & PAGE_FAULT_P_MASK) log("[page_fault_intr_handler] fault caused by page-level protection violation.\n");
+    else log("[page_fault_intr_handler] fault caused by non-present page.\n");
+
+    // read/write bit
+    if (error_code & PAGE_FAULT_WR_MASK) log("[page_fault_intr_handler] access was a write.\n");
+    else log("[page_fault_intr_handler] access was read.\n");
+
+    // user/supervisor
+    if (error_code & PAGE_FAULT_US_MASK) log("[page_fault_intr_handler] user-mode access caused fault.\n");
+    else log("[page_fault_intr_handler] supervisor-mode access caused fault\n");
+
+    // reserved bit
+    if (error_code & PAGE_FAULT_RSVD_MASK) log("[page_fault_intr_handler] fault was caused by a reserved bit set to 1 in some paging-structure entry.\n");
+    else log("[page_fault_intr_handler] fault was not caused by reserved bit violation\n");
+
+    // instruction fetch
+    if (error_code & PAGE_FAULT_IF_MASK) log("[page_fault_intr_handler] fault was caused by instruction fetch.\n");
+    else log("[page_fault_intr_handler] fault was not caused by instruction fetch.\n");
+
+    // protection keys
+    if (error_code & PAGE_FAULT_PK_MASK) log("[page_fault_intr_handler] fault was caused by protection key violation.\n");
+    else log("[page_fault_intr_handler] fault was not caused by protection key violation.\n");
+
+    // sgx
+    if (error_code & PAGE_FAULT_SGX_MASK) log("[page_fault_intr_handler] fault resulted from violation of SGX-specific access-control requirements.\n");
+    else log("[page_fault_intr_handler] fault was not SGX-related.\n");
+
+    // halt 
+    panic("[page_fault_intr_handler] A page fault occurred! Have fun debugging buddy.");
 }
 
 /* 

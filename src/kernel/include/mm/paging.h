@@ -1,9 +1,19 @@
 #pragma once
 
+#include <sys/sys.h>
 #include <mem/mem.h>
 #include <mm/mem.h>
-#include <sys/sys.h>
 #include <boot/stivale2.h>
+#include <cpu/interrupt.h>
+
+#define PAGE_FAULT_IRQ_VEC      0xE
+#define PAGE_FAULT_P_MASK       (1 << 0)
+#define PAGE_FAULT_WR_MASK      (1 << 1)
+#define PAGE_FAULT_US_MASK      (1 << 2)
+#define PAGE_FAULT_RSVD_MASK    (1 << 3)
+#define PAGE_FAULT_IF_MASK      (1 << 4)
+#define PAGE_FAULT_PK_MASK      (1 << 5)
+#define PAGE_FAULT_SGX_MASK     (1 << 15)
 
 #define PAGE_OFFSET_SIZE    12
 #define PAGE_IDX_SIZE       9
@@ -42,8 +52,8 @@ typedef struct {
 } __attribute__((packed)) pml_table_t;
 
 /* page fault handler */
-void paging_intr_handler(void);
-extern void wrapper_paging_intr_handler(void);
+void page_fault_intr_handler(cpu_state_t regs);
+extern void wrapper_page_fault_intr_handler(void);
 
 /* paging api */
 pml_table_t* paging_create(void);

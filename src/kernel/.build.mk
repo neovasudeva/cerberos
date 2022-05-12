@@ -7,7 +7,8 @@ KERNEL_C_SRC+= \
 KERNEL_S_SRC+= \
 	$(wildcard src/kernel/boot/*.S) \
 	$(wildcard src/kernel/cpu/*.S) \
-	$(wildcard src/kernel/dev/*.S) 
+	$(wildcard src/kernel/dev/*.S) \
+	$(wildcard src/kernel/mm/*.S)
 
 KERNEL_DEPS=$(KERNEL_C_SRC:.c=.d)
 
