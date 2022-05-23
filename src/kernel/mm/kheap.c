@@ -3,7 +3,7 @@
 #include <mm/pmm.h>
 
 /* 
- * lower addresses <--------------------------> higher addresses
+ * lower addresses <-------------------------------> higher addresses
  * 
  *   kheap_top                                            VA_END
  * ----------------------------------------------------------
@@ -19,7 +19,7 @@
  * - free_head can be any free block
  * - any block that is_free does not need to do NULL checks on free_next and free_prev
  * - freelist is a circular doubly linked list
- * - block (header) list is a normal linked list
+ * - block (header) list is a normal doubly linked list
 */
 
 /* header struct */
@@ -102,6 +102,9 @@ static inline void freelist_remove(memblock_t* hdr) {
 
 /*
  * merge_right
+ * merge memory block with block/memory on the right
+ * @param header : header to merge right from
+ * @return new header of merged blocks
  */
 static memblock_t* merge_right(memblock_t* header) {
     // verify header
@@ -144,6 +147,9 @@ static memblock_t* merge_right(memblock_t* header) {
 
 /*
  * merge_left
+ * merge memory block with block/memory on the left
+ * @param header : header to merge left from
+ * @return new header of merged blocks
  */
 static memblock_t* merge_left(memblock_t* header) {
     // verify header
@@ -207,6 +213,9 @@ static memblock_t* merge_left(memblock_t* header) {
 
 /* 
  * merge
+ * merge memory block with block/memory on the left and right
+ * @param header : header to merge from
+ * @return new header of merged blocks
  */
 static inline memblock_t* merge(memblock_t* header) {
     header = merge_right(header);
@@ -299,6 +308,12 @@ static void kheap_expand(size_t num_pages) {
     header = merge_right(header);
 }
 
+/* 
+ * kmalloc
+ * dynamically allocated memory for the kernel
+ * @param size : number of bytes to allocate
+ * @return pointer to newly allocated area
+ */
 void* kmalloc(size_t size) {
     // verify size is not 0
     if (size == 0) {
@@ -336,6 +351,12 @@ void* kmalloc(size_t size) {
     return kmalloc(size);
 }
 
+/* 
+ * kfree
+ * frees dynamically allocated memory 
+ * @param size : number of bytes to allocate
+ * @return pointer to newly allocated area
+ */
 void kfree(void* ptr) {
     // get header
     memblock_t* header = (memblock_t*) ((vaddr_t) ptr - sizeof(memblock_t));    
@@ -353,7 +374,11 @@ void kfree(void* ptr) {
     header = merge(header);
 }
 
-// TODO: map pages globally
+/* 
+ * kheap_init
+ * initializes head with @param num_pages pages
+ * @param num_pages : number of pages to initialize heap with
+ */
 void kheap_init(size_t num_pages) {
     // verify kheap is not initialized to 0 pages
     if (num_pages == 0) {
@@ -383,15 +408,6 @@ void kheap_init(size_t num_pages) {
     block_head->prev = NULL;
     free_head->free_next = free_head;
     free_head->free_prev = free_head;
-
-    // TODO: remove me
-    log("[kheap_init] kheap_top: 0x%lx\n", kheap_top);
-    log("[kheap_init] block_head: 0x%lx, free_head: 0x%lx, size: 0x%lx\n", block_head, free_head, free_head->size);
-}
-
-// TODO: remove me
-inline void kheap_test(size_t size) {
-    kheap_expand(size);
 }
 
 /* for debugging */

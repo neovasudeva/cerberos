@@ -7,6 +7,9 @@
 
 #include <log.h>
 
+/* mm/kheap.c */
+extern vaddr_t kheap_max;
+
 void kvm_init(struct stivale2_struct* handover) {
     struct stivale2_struct_tag_kernel_base_address* kernel_base = (struct stivale2_struct_tag_kernel_base_address*) stivale2_get_tag(handover, STIVALE2_STRUCT_TAG_KERNEL_BASE_ADDRESS_ID);
     if (kernel_base == NULL)
@@ -61,6 +64,9 @@ void kvm_init(struct stivale2_struct* handover) {
 
         // log("[kvm_init] ventry 0x%lx, pentry 0x%lx, num 0x%lx, flags 0x%lx\n", ventry, pentry, num, flags);
         __paging_maps(pml4_table, ventry, pentry, num, flags);
+
+        // update kheap_max
+        kheap_max = MAX(kheap_max, entry.base + entry.length);
     }
 
     // direct map physical addr space 
@@ -83,31 +89,7 @@ void kvm_init(struct stivale2_struct* handover) {
 
     // map kernel heap (map singular page )
     // TODO: make kernel heap global pages
-    log("------------------\n");
     kheap_init(KHEAP_INIT_PAGES);
-    log("------------------\n");
-    parse_blocklist();
-    parse_freelist();
-    log("------------------\n");
-    void* temp1 = kmalloc(64);
-    parse_blocklist();
-    parse_freelist();
-    log("------------------\n");
-    void* temp2 = kmalloc(64);
-    parse_blocklist();
-    parse_freelist();
-    log("------------------\n");
-    void* temp3 = kmalloc(64);
-    parse_blocklist();
-    parse_freelist();
-    log("------------------\n");
-    kfree(temp2);
-    parse_blocklist();
-    parse_freelist();
-    log("------------------\n");
-    kfree(temp1);
-    parse_blocklist();
-    parse_freelist();
 
     // TODO: map (map singular page up until 16 MiB) kernel eternal heap?
     // TODO: make these global pages
