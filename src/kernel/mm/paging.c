@@ -5,7 +5,7 @@
 /*
  * page_fault_intr_handler
  * All information about error code for page fault handler is in section 4.7 in Intel docs
- * Linear address taht caused fault in CR2: https://wiki.osdev.org/CPU_Registers_x86-64#CR2
+ * Linear address that caused fault is in CR2: https://wiki.osdev.org/CPU_Registers_x86-64#CR2
  * @param cpu_state: state of regs
  */
 void page_fault_intr_handler(cpu_state_t regs) {
@@ -295,7 +295,12 @@ void paging_unmaps(vaddr_t vaddr, uint64_t num) {
     }
 }
 
-// done
+/*
+ * paging_set_flags
+ * sets @param flags in @param pentry
+ * @param pentry: pml entry to edit flags
+ * @param flags: flags to set
+ */
 inline void paging_set_flags(pml_entry_t* pentry, uint64_t flags) {
     if (flags & PAGE_ADDR) {
         warning("[paging_set_flags] illegal set flag attempt on page entry physical address.");
@@ -305,7 +310,12 @@ inline void paging_set_flags(pml_entry_t* pentry, uint64_t flags) {
     *pentry |= flags;
 }
 
-// done
+/*
+ * paging_clear_flags
+ * clears @param flags in @param pentry
+ * @param pentry: pml entry to edit flags
+ * @param flags: flags to clear
+ */
 inline void paging_clear_flags(pml_entry_t* pentry, uint64_t flags) {
     if (flags & PAGE_ADDR) {
         warning("[paging_clear_flags] illegal clear flag attempt on page entry physical address.");
@@ -315,7 +325,12 @@ inline void paging_clear_flags(pml_entry_t* pentry, uint64_t flags) {
     *pentry &= ~(flags);
 }
 
-// done
+/*
+ * paging_check_flags
+ * checks if @param flags are set in @param pentry
+ * @param pentry: pml entry to check flags for
+ * @param flags: flags to check
+ */
 inline bool paging_check_flags(pml_entry_t* pentry, uint64_t flags) {
     if (flags & PAGE_ADDR) {
         warning("[paging_check_flags] illegal clear flag attempt on page entry physical address.");
@@ -325,7 +340,12 @@ inline bool paging_check_flags(pml_entry_t* pentry, uint64_t flags) {
     return (*pentry & flags) == flags;
 }
 
-// done
+/*
+ * paging_set_paddr
+ * sets @param paddr in @param pentry
+ * @param pentry: pml entry to set physical address
+ * @param paddr: physical address 
+ */
 inline void paging_set_paddr(pml_entry_t* pentry, paddr_t paddr) {
     if (paddr % PAGE_SIZE) {
         warning("[paging_set_addr] paddr is not 4 KiB aligned, paddr: %lx\n", paddr);
@@ -336,7 +356,11 @@ inline void paging_set_paddr(pml_entry_t* pentry, paddr_t paddr) {
     *pentry |= (paddr & PAGE_ADDR);
 }
 
-// done
+/*
+ * paging_get_paddr
+ * gets physical address in @param pentry
+ * @param pentry: pml entry to get physical address
+ */
 inline paddr_t paging_get_paddr(pml_entry_t* pentry) {
     return (paddr_t) (*pentry & PAGE_ADDR);
 }

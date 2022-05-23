@@ -49,7 +49,7 @@ typedef uint64_t pml_entry_t;
 /* tables */
 typedef struct {
     pml_entry_t entries[512];
-} __attribute__((packed)) pml_table_t;
+} pml_table_t;
 
 /* page fault handler */
 void page_fault_intr_handler(cpu_state_t regs);

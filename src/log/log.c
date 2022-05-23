@@ -43,7 +43,7 @@ static inline void print_u(uint32_t val) {
     const int ascii_offset = '0';
 
     if (!val) {
-        __com_puts(0);
+        __com_putc('0');
         return;
     }
 

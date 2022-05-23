@@ -1,4 +1,5 @@
 #include <mm/kvm.h>
+#include <mm/kheap.h>
 #include <mm/pmm.h>
 #include <mm/paging.h>
 #include <mm/memmap.h>
@@ -77,17 +78,37 @@ void kvm_init(struct stivale2_struct* handover) {
     __paging_maps(pml4_table, mem_start, mem_start, num_pages, PAGE_PRESENT | PAGE_WRITABLE);
     __paging_maps(pml4_table, P2V(mem_start), mem_start, num_pages, PAGE_PRESENT | PAGE_WRITABLE);
 
-    // map kernel heap (map singular page )
-    // TODO: make these global pages
-    __paging_map(pml4_table, KHEAP_INIT_VADDR, pmm_alloc(PMM_ZONE_NORMAL, 1), PAGE_PRESENT | PAGE_WRITABLE);
-
-    // TODO: map (map singular page up until 16 MiB) kernel eternal heap?
-    // TODO: make these global pages
-
     // load new mappings to cr3
     load_cr3(pml4_table);
 
-    uint64_t* kheap = (uint64_t*) (0xffffffffffffffff - 16 + 1); 
-    *kheap = 10;
-    log("addr: 0x%lx, data: 0x%lx\n", kheap, *kheap);
+    // map kernel heap (map singular page )
+    // TODO: make kernel heap global pages
+    log("------------------\n");
+    kheap_init(KHEAP_INIT_PAGES);
+    log("------------------\n");
+    parse_blocklist();
+    parse_freelist();
+    log("------------------\n");
+    void* temp1 = kmalloc(64);
+    parse_blocklist();
+    parse_freelist();
+    log("------------------\n");
+    void* temp2 = kmalloc(64);
+    parse_blocklist();
+    parse_freelist();
+    log("------------------\n");
+    void* temp3 = kmalloc(64);
+    parse_blocklist();
+    parse_freelist();
+    log("------------------\n");
+    kfree(temp2);
+    parse_blocklist();
+    parse_freelist();
+    log("------------------\n");
+    kfree(temp1);
+    parse_blocklist();
+    parse_freelist();
+
+    // TODO: map (map singular page up until 16 MiB) kernel eternal heap?
+    // TODO: make these global pages
 }
