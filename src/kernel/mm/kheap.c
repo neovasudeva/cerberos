@@ -346,6 +346,13 @@ void* kmalloc(size_t size) {
     // no free block large enough found, expand heap enough to fit request
     size_t new_size = size + sizeof(memblock_t);
     size_t new_pages = (new_size / PAGE_SIZE) + (new_size % PAGE_SIZE ? 1 : 0);
+
+    // allocate less memory if block_head is free (it'll be merged)
+    if (is_free(block_head)) {
+        new_size = size - block_head->size + sizeof(memblock_t);  
+        new_pages = (new_size / PAGE_SIZE) + (new_size % PAGE_SIZE ? 1 : 0);
+    }
+
     log("[kmalloc] expanding heap by %lu pages ...\n", new_pages);
     kheap_expand(new_pages);
     return kmalloc(size);

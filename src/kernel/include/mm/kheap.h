@@ -4,7 +4,7 @@
 #include <mm/mem.h>
 #include <stivale/stivale2.h>
 
-#define KHEAP_INIT_PAGES    8
+#define KHEAP_INIT_PAGES    1
 #define KHEAP_MIN_FREE_SIZE 1
 
 /* kernel heap api */
