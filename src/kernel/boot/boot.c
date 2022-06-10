@@ -11,6 +11,7 @@
 #include <cpu/idt.h>
 #include <mm/pmm.h>
 #include <mm/kvm.h>
+#include <acpi/acpi.h>
 
 /*
  * entry point for kernel 
@@ -22,6 +23,7 @@ void _start(struct stivale2_struct* handover) {
     pic_disable();
     pmm_init(handover);
     kvm_init(handover);
+    acpi_init(handover);
 
     for (;;) {
         hlt();

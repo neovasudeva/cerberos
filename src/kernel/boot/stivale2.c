@@ -40,6 +40,13 @@ static struct stivale2_struct_tag_hhdm hhdm_struct_tag = {
     }
 };
 
+static struct stivale2_struct_tag_rsdp rsdp_struct_tag = {
+    .tag = {
+        .identifier = STIVALE2_STRUCT_TAG_RSDP_ID,
+        .next = (uint64_t) &hhdm_struct_tag
+    }
+};
+
 /*
  * stivale header tag
  */
@@ -48,7 +55,7 @@ static struct stivale2_header stivale_hdr = {
     .entry_point = 0,
     .stack = (uintptr_t)stack + sizeof(stack),
     .flags = (1 << 1) | (1 << 2) | (1 << 3) | (1 << 4),
-    .tags = (uint64_t) &hhdm_struct_tag
+    .tags = (uint64_t) &rsdp_struct_tag
 };
  
 /* 

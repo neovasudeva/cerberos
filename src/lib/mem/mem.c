@@ -85,3 +85,23 @@ size_t strlen(const char* src) {
     }
     return len;
 }
+
+/* 
+ * strncmp
+ * compares @param num bytes of @param str1 and @param str2
+ * @param str1: first string in comparison
+ * @param str2: second string in comparison
+ * @returns negative value if str1 is lexicographically first, positive value if str2 is lexicographically first, or 0 if equal
+ */
+int strncmp(const char* str1, const char* str2, size_t num) {
+    while (num && *str1 && (*str1 == *str2)) {
+        str1++;
+        str2++;
+        num--;
+    }
+
+    if (num == 0)
+        return 0;
+
+    return (*((unsigned char*) str1) - *((unsigned char*) str2));
+}
