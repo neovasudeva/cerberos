@@ -1,8 +1,16 @@
 #include <acpi/acpi.h>
-#include <boot/stivale2.h>
+#include <acpi/madt.h>
 #include <mm/mem.h>
+#include <boot/stivale2.h>
 #include <mem/mem.h>
 #include <log.h>
+
+/* RSDT/XSDT */
+static rsdt_t rsdt = {
+    .sdt_hdr = NULL,
+    .acpi_version = ACPI_V1,
+    .table_ptr = NULL
+};
 
 static bool verify_rsdp_checksum(rsdp_t* rsdp) {
     uint8_t checksum = 0;
@@ -27,9 +35,15 @@ static bool verify_rsdp_checksum(rsdp_t* rsdp) {
 }
 
 // sdt_hdr = hdr of root table
-sdt_header_t* acpi_find_table(sdt_header_t* root_sdt_hdr, uint8_t acpi_version, char* table) {
-    // verify sdt_hdr is not NULL
-    if (root_sdt_hdr == NULL) {
+sdt_header_t* acpi_find_table(char* table) {
+    // verify root sdt_hdr is not NULL
+    if (rsdt.sdt_hdr == NULL) {
+        warning("[acpi_find_table] sdt_hdr is NULL\n");
+        return NULL;
+    }
+
+    // verify ptr to rsdt/xsdt ptr tables is valid
+    if (rsdt.table_ptr == NULL) {
         warning("[acpi_find_table] sdt_hdr is NULL\n");
         return NULL;
     }
@@ -40,34 +54,45 @@ sdt_header_t* acpi_find_table(sdt_header_t* root_sdt_hdr, uint8_t acpi_version, 
         return NULL;
     }
 
-    // find table (varies for ACPI version 1 and 2+)
-    if (acpi_version == ACPI_V1) {
-        rsdt_t* rsdt = (rsdt_t*) root_sdt_hdr;
-        const size_t rsdt_entries = (rsdt->sdt_hdr.length - sizeof(sdt_header_t)) / sizeof(uint32_t);
-        
-        for (size_t i = 0; i < rsdt_entries; i++) {
-            sdt_header_t* sdt_hdr = (sdt_header_t*) ((uint64_t) (rsdt->table_ptr[i]));
-            if (!strncmp(table, sdt_hdr->signature, 4)) 
-                return sdt_hdr;
-        }
-
-    } else if (acpi_version == ACPI_V2) {
-        xsdt_t* xsdt = (xsdt_t*) root_sdt_hdr;
-        const size_t xsdt_entries = (xsdt->sdt_hdr.length - sizeof(sdt_header_t)) / sizeof(uint64_t);
-
-        for (size_t i = 0; i < xsdt_entries; i++) {
-            sdt_header_t* sdt_hdr = (sdt_header_t*) xsdt->table_ptr[i];
-            if (!strncmp(table, sdt_hdr->signature, 4)) 
-                return sdt_hdr;
-        }
-
-    } else {
-        warning("[acpi_find_table] invalid acpi version was passed in: %u\n", acpi_version);
+    // verify ACPI version
+    if (rsdt.acpi_version != ACPI_V1 && rsdt.acpi_version != ACPI_V2) {
+        warning("[acpi_find_table] acpi_version is not valid: %d\n", rsdt.acpi_version);
         return NULL;
+    }
+
+    // find table (varies for ACPI version 1 and 2+)
+    size_t rsdt_entries = 0;
+    if (rsdt.acpi_version == ACPI_V1) {
+        // rsdt
+        rsdt_entries = (rsdt.sdt_hdr->length - sizeof(sdt_header_t)) / sizeof(uint32_t);
+        uint32_t* table_ptr = (uint32_t*) rsdt.table_ptr;
+
+        for (size_t i = 0; i < rsdt_entries; i++) {
+            sdt_header_t* sdt_hdr = (sdt_header_t*) ((uint64_t) table_ptr[i]);
+
+            if (!strncmp(table, sdt_hdr->signature, 4)) 
+                return sdt_hdr;
+        }
+
+    } else if (rsdt.acpi_version == ACPI_V2) {
+        // xsdt
+        rsdt_entries = (rsdt.sdt_hdr->length - sizeof(sdt_header_t)) / sizeof(uint64_t);
+        uint64_t* table_ptr = (uint64_t*) rsdt.table_ptr;
+
+        for (size_t i = 0; i < rsdt_entries; i++) {
+            sdt_header_t* sdt_hdr = (sdt_header_t*) table_ptr[i];
+
+            if (!strncmp(table, sdt_hdr->signature, 4)) 
+                return sdt_hdr;
+        }
     }
 
     warning("[acpi_find_table] table was not found\n");
     return NULL;
+}
+
+rsdt_t* get_rsdt(void) {
+    return &rsdt;
 }
 
 void acpi_init(struct stivale2_struct* handover) {
@@ -79,36 +104,23 @@ void acpi_init(struct stivale2_struct* handover) {
     if (!verify_rsdp_checksum(rsdp)) 
         panic("RSDP checksum could not be verified");
 
-    log("rsdp revision: %u\n", rsdp->revision);
+    info("[acpi_init] rsdp revision: %u\n", rsdp->revision);
 
-    if (rsdp->revision == ACPI_V1) {
-        // ACPI version 1 w/ RSDT is used
-        info("[acpi_init] ACPI version 1 used. Work still to do ...\n");
+    rsdt.sdt_hdr = (sdt_header_t*) P2V(rsdp->rsdt_address);
+    rsdt.acpi_version = rsdp->revision;
+    rsdt.table_ptr = (void*) (rsdt.sdt_hdr + 1);
+    
+    if (!verify_sdt_checksum(rsdt.sdt_hdr))
+        panic("RSDT/XSDT checksum could not be verified");
 
-        // parse rsdt
-        rsdt_t* rsdt = (rsdt_t*) P2V(rsdp->rsdt_address);
-        if (!verify_sdt_checksum(&rsdt->sdt_hdr)) 
-            panic("RSDT checksum could not be verified");
+    // find madt
+    sdt_header_t* madt_hdr = acpi_find_table("APIC");
+    if (madt_hdr == NULL) 
+        panic("MADT table was not found");
+    
+    madt_hdr = (sdt_header_t*) P2V((paddr_t) madt_hdr);
+    log("madt_hdr signature: %s\n", madt_hdr->signature); 
 
-        // find madt
-        sdt_header_t* madt_hdr = acpi_find_table(&rsdt->sdt_hdr, rsdp->revision, "APIC");
-        if (madt_hdr == NULL) 
-            panic("MADT table was not found");
-        
-        madt_hdr = (sdt_header_t*) P2V((paddr_t) madt_hdr);
-        log("madt_hdr signature: %s\n", madt_hdr->signature); 
-
-        // parse madt
-
-        
-    } else {
-        // ACPI version 2 w/ XSDT is used
-        log("[acpi_init] ACPI version 2 used. Work still to do ...\n");
-
-        // get xsdt and verify checksum
-
-        // get xsdt num entries
-
-    }
-
+    // parse madt
+    parse_madt(madt_hdr);
 }

@@ -25,16 +25,16 @@ typedef struct {
     uint8_t reserved[3];
 } __attribute__((packed)) rsdp_t;
 
-/* rsdt/xsdt struct */
+/* 
+ * rsdt/xsdt struct 
+ * NOTE: this is not representative of how RSDT/XSDT is modelled in memory. Rather, this struct contains metadata about RSDT/XSDT
+ */
 typedef struct {
-    sdt_header_t sdt_hdr;
-    uint32_t table_ptr[];  
+    sdt_header_t* sdt_hdr;
+    uint8_t acpi_version;
+    void* table_ptr;
 } __attribute__((packed)) rsdt_t;
 
-typedef struct {
-    sdt_header_t sdt_hdr;
-    uint64_t table_ptr[];
-} __attribute__((packed)) xsdt_t;
-
+sdt_header_t* acpi_find_table(char* table);
+rsdt_t* get_rsdt(void);
 void acpi_init(struct stivale2_struct* handover);
-sdt_header_t* acpi_find_table(sdt_header_t* root_sdt_hdr, uint8_t acpi_version, char* table);

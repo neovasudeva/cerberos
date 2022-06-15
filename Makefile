@@ -51,7 +51,7 @@ include sysroot/.build.mk
 
 QEMUFLAGS= \
 	-m 4G \
-	-smp 1 \
+	-smp 2 \
 	-drive format=raw,media=cdrom,file=$(SYSROOT_ISO) \
 	-serial stdio \
 	-s -S
