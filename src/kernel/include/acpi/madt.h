@@ -13,6 +13,9 @@
 
 #define MADT_OFFSET                 ((uint8_t) 0x2c)
 
+#define LINT0                       0
+#define LINT1                       1
+
 /* MADT */
 typedef struct {
     sdt_header_t sdt_hdr;
@@ -79,5 +82,30 @@ typedef struct {
     uint32_t flags;
     uint32_t acpi_id;
 } __attribute__ ((packed)) lx2apic_t;
+
+/* MADT info struct */
+typedef struct {
+    uint64_t num_lapic;
+    processor_lapic_t** lapics;
+
+    uint64_t num_io_apic;
+    io_apic_t** io_apics;
+
+    uint64_t num_intr_src_override;
+    interrupt_src_override_t** intr_src_overrides;
+
+    uint64_t num_apic_nmi_src;
+    apic_nmi_src_t** nmi_srcs;
+
+    uint64_t num_lapic_nmi;
+    lapic_nmi_t** lapic_nmis;
+
+    lapic_addr_override_t* lapic_addr_override;
+
+    uint64_t num_lx2apic;
+    lx2apic_t** lx2apics;
+
+    uint64_t lapic_paddr;
+} madt_info_t;
 
 void parse_madt(sdt_header_t* madt_hdr);

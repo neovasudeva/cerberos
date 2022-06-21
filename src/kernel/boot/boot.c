@@ -9,8 +9,10 @@
 #include <dev/kbd.h>
 #include <cpu/gdt.h>
 #include <cpu/idt.h>
+#include <cpu/smp.h>
 #include <mm/pmm.h>
-#include <mm/kvm.h>
+#include <mm/paging.h>
+#include <mm/kheap.h>
 #include <acpi/acpi.h>
 
 /*
@@ -22,8 +24,15 @@ void _start(struct stivale2_struct* handover) {
     idt_init();
     pic_disable();
     pmm_init(handover);
-    kvm_init(handover);
+    paging_init(handover);
+
+    // TODO: make kernel heap global pages
+    kheap_init(handover, KHEAP_INIT_PAGES);
+    // TODO: map (map singular page up until 16 MiB) kernel eternal heap?
+    // kheap_eternal_init();
+
     acpi_init(handover);
+    smp_init(handover);
 
     for (;;) {
         hlt();

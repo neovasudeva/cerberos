@@ -384,15 +384,26 @@ void kfree(void* ptr) {
 /* 
  * kheap_init
  * initializes head with @param num_pages pages
+ * @param handover : bootloader handover struct
  * @param num_pages : number of pages to initialize heap with
  */
-void kheap_init(size_t num_pages) {
+void kheap_init(struct stivale2_struct* handover, size_t num_pages) {
     // verify kheap is not initialized to 0 pages
     if (num_pages == 0) {
         error("[kheap_init] kheap_init was asked to initialize heap with 0 pages.\n");
         return;
     }
-        
+
+    struct stivale2_struct_tag_pmrs* pmrs = (struct stivale2_struct_tag_pmrs*) stivale2_get_tag(handover, STIVALE2_STRUCT_TAG_PMRS_ID);
+    if (pmrs == NULL)
+        panic("[kheap_init] stivale2 pmrs tag was not found");
+
+    // calculate kheap_max
+    for (uint64_t i = 0; i < pmrs->entries; i++) {
+        struct stivale2_pmr entry = pmrs->pmrs[i];
+        kheap_max = MAX(kheap_max, entry.base + entry.length);
+    }
+
     // calculate new kheap_top
     kheap_top = VA_END - PAGE_SIZE * num_pages + 1;
 

@@ -11,7 +11,7 @@
 void* kmalloc(size_t size);
 void kfree(void* ptr);
 
-void kheap_init(size_t num_pages);
+void kheap_init(struct stivale2_struct* handover, size_t num_pages);
 
 /* debugging */
 void parse_blocklist(void);

@@ -13,7 +13,13 @@ static uint8_t stack[16 * KiB];
  * kernel to bootloader (header) tags
  */
  
-// NO TAGS
+static struct stivale2_header_tag_smp smp_hdr_tag = {
+    .tag = {
+        .identifier = STIVALE2_HEADER_TAG_SMP_ID,
+        .next = 0
+    },
+    .flags = 0
+};
 
 /*
  * bootloader to kernel (struct) tags
@@ -22,7 +28,7 @@ static uint8_t stack[16 * KiB];
 static struct stivale2_struct_tag_kernel_base_address kernel_base_addr_struct_tag = {
     .tag = {
         .identifier = STIVALE2_STRUCT_TAG_KERNEL_BASE_ADDRESS_ID,
-        .next = 0
+        .next = (uint64_t) &smp_hdr_tag
     }
 };
 

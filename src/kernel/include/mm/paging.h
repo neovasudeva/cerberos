@@ -51,6 +51,8 @@ typedef struct {
     pml_entry_t entries[512];
 } pml_table_t;
 
+void paging_init(struct stivale2_struct* handover);
+
 /* page fault handler */
 void page_fault_intr_handler(cpu_state_t regs);
 extern void wrapper_page_fault_intr_handler(void);
