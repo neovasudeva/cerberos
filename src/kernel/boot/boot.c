@@ -10,6 +10,7 @@
 #include <cpu/gdt.h>
 #include <cpu/idt.h>
 #include <cpu/smp.h>
+#include <cpu/ioapic.h>
 #include <mm/pmm.h>
 #include <mm/paging.h>
 #include <mm/kheap.h>
@@ -33,6 +34,9 @@ void _start(struct stivale2_struct* handover) {
 
     acpi_init(handover);
     smp_init(handover);
+
+    /* devices */
+    kbd_init();
 
     for (;;) {
         hlt();

@@ -12,6 +12,16 @@ typedef enum {
     LAPIC_ICR_LOW             = 0x300,
     LAPIC_ICR_HIGH            = 0x310,
 
+    /* In-Service Register (ISR) */
+    LAPIC_ISR_31_0            = 0x100,
+    LAPIC_ISR_63_32           = 0x110,
+    LAPIC_ISR_95_64           = 0x120,
+    LAPIC_ISR_127_96          = 0x130,
+    LAPIC_ISR_159_128         = 0x140,
+    LAPIC_ISR_191_160         = 0x150,
+    LAPIC_ISR_223_192         = 0x160,
+    LAPIC_ISR_255_224         = 0x170,
+
     /* LVT regs */
     LAPIC_LVT_CMI_REG         = 0x2f0,
     LAPIC_LVT_TIMER_REG       = 0x320,
@@ -32,7 +42,7 @@ typedef enum {
 #define LVT_SMI     0b010
 #define LVT_NMI     0b100
 #define LVT_INIT    0b101
-#define LVT_EXTINIT 0b111
+#define LVT_EXTINT  0b111
 
 /* LVT delivery status */
 #define LVT_IDLE    0b0
@@ -121,7 +131,7 @@ typedef union {
 /* lapic api */
 void lapic_enable(void);
 void lapic_disable(void);
-void lapic_eoi(void);
+void lapic_eoi(uint8_t intr_vec);
 
 uint32_t lapic_read(lapic_reg_e reg);
 void lapic_write(lapic_reg_e reg, uint32_t val);

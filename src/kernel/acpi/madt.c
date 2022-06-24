@@ -1,8 +1,11 @@
 #include <acpi/madt.h>
 #include <mm/kheap.h>
+#include <cpu/ioapic.h>
 #include <log.h>
 
 #define MAX_ENTRY_TYPE  10
+
+// TODO: have a globally accessable bsp_lapic id
 
 /* coalesced info from MADT */
 madt_info_t madt_info = {
@@ -75,27 +78,27 @@ void parse_madt(sdt_header_t* madt_hdr) {
 
         switch (entry_hdr->entry_type) {
             case PROCESSOR_LAPIC:
-                processor_lapic_t* entry0 = (processor_lapic_t*) entry_hdr;
+                madt_lapic_t* entry0 = (madt_lapic_t*) entry_hdr;
                 log("PROCESSOR LAPIC:\nacpi_processor_id: %u, apic_id: %u\n", entry0->acpi_processor_id, entry0->apic_id);
                 madt_info.num_lapic++;
                 break;
             case IO_APIC:
-                io_apic_t* entry1 = (io_apic_t*) entry_hdr;
+                madt_ioapic_t* entry1 = (madt_ioapic_t*) entry_hdr;
                 log("IO_APIC:\nio_apic_id: %u, io_apic_addr: 0x%x, gsi_base: %u\n", entry1->io_apic_id, entry1->io_apic_addr, entry1->gsi_base);
                 madt_info.num_io_apic++;
                 break;
             case INTERRUPT_SRC_OVERRIDE:
-                interrupt_src_override_t* entry2 = (interrupt_src_override_t*) entry_hdr;
+                madt_intr_src_override_t* entry2 = (madt_intr_src_override_t*) entry_hdr;
                 log("INTERRUPT_SRC_OVERRIDE:\nbus_src: %u, irq_src: %u, gsi: %u, flags: %u\n", entry2->bus_src, entry2->irq_src, entry2->gsi, entry2->flags);
                 madt_info.num_intr_src_override++;
                 break;
             case APIC_NMI_SRC:
-                apic_nmi_src_t* entry3 = (apic_nmi_src_t*) entry_hdr;
+                madt_apic_nmi_src_t* entry3 = (madt_apic_nmi_src_t*) entry_hdr;
                 log("APIC_NMI_SRC:\nnmi_src: %u, flags: %u, gsi: %u\n", entry3->nmi_src, entry3->flags, entry3->gsi);
                 madt_info.num_apic_nmi_src++;
                 break;
             case LAPIC_NMI:
-                lapic_nmi_t* entry4 = (lapic_nmi_t*) entry_hdr;
+                madt_lapic_nmi_t* entry4 = (madt_lapic_nmi_t*) entry_hdr;
                 log("LAPIC_NMI:\nacpi_processor_id: 0x%x, flags: %u, lint: %u\n", entry4->acpi_processor_id, entry4->flags, entry4->lint);
                 madt_info.num_lapic_nmi++;
                 break;
@@ -103,11 +106,11 @@ void parse_madt(sdt_header_t* madt_hdr) {
                 if (madt_info.lapic_addr_override != NULL) 
                     panic("MADT contains more than one lapic address override entry.\n");
 
-                madt_info.lapic_addr_override = (lapic_addr_override_t*) entry_hdr;
+                madt_info.lapic_addr_override = (madt_lapic_addr_override_t*) entry_hdr;
                 log("LAPIC_ADDR_OVERRIDE:\nlapic_paddr: 0x%lx\n", madt_info.lapic_addr_override->lapic_paddr);
                 break;
             case LX2APIC:
-                lx2apic_t* entry9 = (lx2apic_t*) entry_hdr;
+                madt_lx2apic_t* entry9 = (madt_lx2apic_t*) entry_hdr;
                 log("LX2APIC:\nlx2apic_id: %u, flags: %u, acpi_id: %u\n", entry9->lx2apic_id, entry9->flags, entry9->acpi_id);
                 madt_info.num_lx2apic++;
                 break;
@@ -128,17 +131,17 @@ void parse_madt(sdt_header_t* madt_hdr) {
 
     // build madt_info struct
     if (madt_info.num_lapic)
-        madt_info.lapics = (processor_lapic_t**) kmalloc(madt_info.num_lapic * sizeof(processor_lapic_t*));
+        madt_info.lapics = (madt_lapic_t**) kmalloc(madt_info.num_lapic * sizeof(madt_lapic_t*));
     if (madt_info.num_io_apic)
-        madt_info.io_apics = (io_apic_t**) kmalloc(madt_info.num_io_apic * sizeof(io_apic_t*));
+        madt_info.io_apics = (madt_ioapic_t**) kmalloc(madt_info.num_io_apic * sizeof(madt_ioapic_t*));
     if (madt_info.num_intr_src_override)
-        madt_info.intr_src_overrides = (interrupt_src_override_t**) kmalloc(madt_info.num_intr_src_override * sizeof(interrupt_src_override_t*));
+        madt_info.intr_src_overrides = (madt_intr_src_override_t**) kmalloc(madt_info.num_intr_src_override * sizeof(madt_intr_src_override_t*));
     if (madt_info.num_apic_nmi_src)
-        madt_info.nmi_srcs = (apic_nmi_src_t**) kmalloc(madt_info.num_apic_nmi_src * sizeof(apic_nmi_src_t*));
+        madt_info.nmi_srcs = (madt_apic_nmi_src_t**) kmalloc(madt_info.num_apic_nmi_src * sizeof(madt_apic_nmi_src_t*));
     if (madt_info.num_lapic_nmi)
-        madt_info.lapic_nmis = (lapic_nmi_t**) kmalloc(madt_info.num_lapic_nmi * sizeof(lapic_nmi_t*));
+        madt_info.lapic_nmis = (madt_lapic_nmi_t**) kmalloc(madt_info.num_lapic_nmi * sizeof(madt_lapic_nmi_t*));
     if (madt_info.num_lx2apic)
-        madt_info.lx2apics = (lx2apic_t**) kmalloc(madt_info.num_lx2apic * sizeof(lx2apic_t*));
+        madt_info.lx2apics = (madt_lx2apic_t**) kmalloc(madt_info.num_lx2apic * sizeof(madt_lx2apic_t*));
 
     i = 0; 
     uint64_t entry_counters[MAX_ENTRY_TYPE] = {0};
@@ -147,25 +150,27 @@ void parse_madt(sdt_header_t* madt_hdr) {
 
         switch (entry_hdr->entry_type) {
             case PROCESSOR_LAPIC:
-                madt_info.lapics[entry_counters[PROCESSOR_LAPIC]++] = (processor_lapic_t*) entry_hdr;
+                madt_info.lapics[entry_counters[PROCESSOR_LAPIC]++] = (madt_lapic_t*) entry_hdr;
                 break;
             case IO_APIC:
-                madt_info.io_apics[entry_counters[IO_APIC]++] = (io_apic_t*) entry_hdr;
+                madt_info.io_apics[entry_counters[IO_APIC]] = (madt_ioapic_t*) entry_hdr;
+                ioapic_register(madt_info.io_apics[entry_counters[IO_APIC]]);
+                entry_counters[IO_APIC]++;
                 break;
             case INTERRUPT_SRC_OVERRIDE:
-                madt_info.intr_src_overrides[entry_counters[INTERRUPT_SRC_OVERRIDE]++] = (interrupt_src_override_t*) entry_hdr;
+                madt_info.intr_src_overrides[entry_counters[INTERRUPT_SRC_OVERRIDE]++] = (madt_intr_src_override_t*) entry_hdr;
                 break;
             case APIC_NMI_SRC:
-                madt_info.nmi_srcs[entry_counters[APIC_NMI_SRC]++] = (apic_nmi_src_t*) entry_hdr;
+                madt_info.nmi_srcs[entry_counters[APIC_NMI_SRC]++] = (madt_apic_nmi_src_t*) entry_hdr;
                 break;
             case LAPIC_NMI:
-                madt_info.lapic_nmis[entry_counters[LAPIC_NMI]++] = (lapic_nmi_t*) entry_hdr;
+                madt_info.lapic_nmis[entry_counters[LAPIC_NMI]++] = (madt_lapic_nmi_t*) entry_hdr;
                 break;
             case LAPIC_ADDR_OVERRIDE:
                 madt_info.lapic_paddr = madt_info.lapic_addr_override->lapic_paddr;
                 break;
             case LX2APIC:
-                madt_info.lx2apics[entry_counters[LX2APIC]++] = (lx2apic_t*) entry_hdr;
+                madt_info.lx2apics[entry_counters[LX2APIC]++] = (madt_lx2apic_t*) entry_hdr;
                 break;
             default:
                 warning("[parse_madt] unknown entry type was detected: %u\n", entry_hdr->entry_type);

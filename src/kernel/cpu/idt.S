@@ -9,5 +9,5 @@ global idt_load
 extern idt_info
 idt_load:
     lidt [idt_info]
-    ;sti ; <-- enable interrupts
+    sti ; <-- enable interrupts
     ret

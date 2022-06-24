@@ -8,7 +8,7 @@ extern madt_info_t madt_info;
 
 static inline void configure_nmi(void) {
     for (uint64_t i = 0; i < madt_info.num_lapic_nmi; i++) {
-        lapic_nmi_t* nmi = madt_info.lapic_nmis[i];
+        madt_lapic_nmi_t* nmi = madt_info.lapic_nmis[i];
         if (lapic_id() == nmi->acpi_processor_id || nmi->acpi_processor_id == LAPIC_ALL) {
             lvt_entry_t lvt_nmi = {
                 .vector         = 2,                                        // ignored, 2 = NMI exception vector
@@ -29,11 +29,11 @@ static inline void configure_nmi(void) {
 }
 
 inline uint32_t lapic_read(lapic_reg_e reg) {
-    return *((uint32_t volatile*) (madt_info.lapic_paddr + reg));
+    return *((volatile uint32_t*) (madt_info.lapic_paddr + reg));
 }
 
 inline void lapic_write(lapic_reg_e reg, uint32_t val) {
-    *((uint32_t volatile*) (madt_info.lapic_paddr + reg)) = val;
+    *((volatile uint32_t*) (madt_info.lapic_paddr + reg)) = val;
 }
 
 inline void lapic_ipi(ipi_t* ipi) {
@@ -62,6 +62,13 @@ void lapic_disable(void) {
     lapic_write(LAPIC_SPR_INTR_VEC_REG, val);
 }
 
-void lapic_eoi(void) {
-    // FINISH ME
+// TODO: remove magic numbers
+void lapic_eoi(uint8_t intr_vec) {
+    // width of icr = 32
+    uint8_t isr_reg_offset = intr_vec / 32;    
+    uint8_t isr_reg_bit = intr_vec % 32;
+
+    uint32_t isr = lapic_read(LAPIC_ISR_31_0 + isr_reg_offset * 0x10);
+    if (isr & (1 << isr_reg_bit)) 
+        lapic_write(LAPIC_EOI_REG, 1);  // 1 is arbitrary, can be anything
 }

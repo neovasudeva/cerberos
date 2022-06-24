@@ -1,14 +1,20 @@
 #include <dev/kbd.h>
-#include <dev/pic.h>
 #include <dev/text.h>
 #include <cpu/interrupt.h>
+#include <cpu/ioapic.h>
+#include <cpu/lapic.h>
+
+// TODO: remove me
+static char temp = 'A';
 
 void kbd_init(void) {
-    register_intr_handler(&wrapper_kbd_intr_handler, KBD_IRQ_VEC);
-    enable_irq(KBD_IRQ);
+    register_intr_handler(&wrapper_kbd_intr_handler, KBD_INTR_VEC);
+    ioapic_set_irq(0, KBD_IRQ, 0, KBD_INTR_VEC);
 }
 
 void kbd_intr_handler(void) {
     inb(KBD_DATA_PORT);
-    send_eoi(KBD_IRQ);
+    text_write(0, temp, RED, GREEN);
+    temp++;
+    lapic_eoi(KBD_INTR_VEC);
 }

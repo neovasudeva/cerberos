@@ -27,7 +27,7 @@ void smp_ap_entry(void) {
     log("[smp_ap_entry] enabling processor %u ...\n", lapic_id());
 
     // initialize gdt
-    // initialize idt
+    // initialize idt (???)
     // map kheap
     // lapic_enable();
 

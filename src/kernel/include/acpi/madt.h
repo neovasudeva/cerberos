@@ -36,7 +36,7 @@ typedef struct {
     uint8_t acpi_processor_id;
     uint8_t apic_id;
     uint32_t flags;
-} __attribute__ ((packed)) processor_lapic_t;
+} __attribute__ ((packed)) madt_lapic_t;
 
 typedef struct {
     madt_header_t madt_hdr;
@@ -44,7 +44,7 @@ typedef struct {
     uint8_t reserved;
     uint32_t io_apic_addr;
     uint32_t gsi_base;
-} __attribute__ ((packed)) io_apic_t;
+} __attribute__ ((packed)) madt_ioapic_t;
 
 typedef struct {
     madt_header_t madt_hdr;
@@ -52,7 +52,7 @@ typedef struct {
     uint8_t irq_src;
     uint32_t gsi;
     uint16_t flags;
-} __attribute__ ((packed)) interrupt_src_override_t;
+} __attribute__ ((packed)) madt_intr_src_override_t;
 
 typedef struct {
     madt_header_t madt_hdr;
@@ -60,20 +60,20 @@ typedef struct {
     uint8_t reserved;
     uint16_t flags;
     uint32_t gsi;
-} __attribute__ ((packed)) apic_nmi_src_t;
+} __attribute__ ((packed)) madt_apic_nmi_src_t;
 
 typedef struct {
     madt_header_t madt_hdr;
     uint8_t acpi_processor_id;
     uint16_t flags;
     uint8_t lint;
-} __attribute__ ((packed)) lapic_nmi_t;
+} __attribute__ ((packed)) madt_lapic_nmi_t;
 
 typedef struct {
     madt_header_t madt_hdr;
     uint16_t reserved;
     uint64_t lapic_paddr;
-} __attribute__ ((packed)) lapic_addr_override_t;
+} __attribute__ ((packed)) madt_lapic_addr_override_t;
 
 typedef struct {
     madt_header_t madt_hdr;
@@ -81,29 +81,29 @@ typedef struct {
     uint32_t lx2apic_id;
     uint32_t flags;
     uint32_t acpi_id;
-} __attribute__ ((packed)) lx2apic_t;
+} __attribute__ ((packed)) madt_lx2apic_t;
 
 /* MADT info struct */
 typedef struct {
     uint64_t num_lapic;
-    processor_lapic_t** lapics;
+    madt_lapic_t** lapics;
 
     uint64_t num_io_apic;
-    io_apic_t** io_apics;
+    madt_ioapic_t** io_apics;
 
     uint64_t num_intr_src_override;
-    interrupt_src_override_t** intr_src_overrides;
+    madt_intr_src_override_t** intr_src_overrides;
 
     uint64_t num_apic_nmi_src;
-    apic_nmi_src_t** nmi_srcs;
+    madt_apic_nmi_src_t** nmi_srcs;
 
     uint64_t num_lapic_nmi;
-    lapic_nmi_t** lapic_nmis;
+    madt_lapic_nmi_t** lapic_nmis;
 
-    lapic_addr_override_t* lapic_addr_override;
+    madt_lapic_addr_override_t* lapic_addr_override;
 
     uint64_t num_lx2apic;
-    lx2apic_t** lx2apics;
+    madt_lx2apic_t** lx2apics;
 
     uint64_t lapic_paddr;
 } madt_info_t;
