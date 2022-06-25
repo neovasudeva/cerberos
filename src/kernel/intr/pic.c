@@ -1,5 +1,5 @@
 #include <sys/io.h>
-#include <dev/pic.h>
+#include <intr/pic.h>
 
 void pic_init() {
     /* remap pic */
@@ -9,7 +9,7 @@ void pic_init() {
     pic_disable_all();
 
     /* enable slave PIC */
-    enable_irq(SLAVE_LINE);
+    pic_enable_irq(SLAVE_LINE);
 }
 
 void pic_remap() {
@@ -56,7 +56,7 @@ void pic_disable(void) {
     pic_disable_all();
 }
 
-void enable_irq(uint8_t irq) {
+void pic_enable_irq(uint8_t irq) {
     if (irq > 15) {
         return;
     }
@@ -75,7 +75,7 @@ void enable_irq(uint8_t irq) {
     io_wait();
 }
 
-void disable_irq(uint8_t irq) {
+void pic_disable_irq(uint8_t irq) {
     if (irq > 15) {
         return;
     }
@@ -94,7 +94,7 @@ void disable_irq(uint8_t irq) {
     io_wait();
 }
 
-void send_eoi(uint8_t irq) {
+void pic_eoi(uint8_t irq) {
     if (irq > 15) {
         return;
     }

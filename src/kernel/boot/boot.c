@@ -5,15 +5,15 @@
 #include <boot/stivale2.h>
 #include <dev/text.h>
 #include <dev/com.h>
-#include <dev/pic.h>
 #include <dev/kbd.h>
-#include <cpu/gdt.h>
-#include <cpu/idt.h>
-#include <cpu/smp.h>
-#include <cpu/ioapic.h>
+#include <intr/pic.h>
+#include <intr/idt.h>
+#include <intr/apic.h>
+#include <mm/gdt.h>
 #include <mm/pmm.h>
 #include <mm/paging.h>
 #include <mm/kheap.h>
+#include <cpu/smp.h>
 #include <acpi/acpi.h>
 
 /*
@@ -33,6 +33,7 @@ void _start(struct stivale2_struct* handover) {
     // kheap_eternal_init();
 
     acpi_init(handover);
+    apic_init(handover);
     smp_init(handover);
 
     /* devices */

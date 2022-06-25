@@ -1,10 +1,10 @@
 #include <sys/sys.h>
 
-#include <cpu/interrupt.h>
-#include <cpu/idt.h>
+#include <intr/interrupt.h>
+#include <intr/idt.h>
 #include <dev/com.h>
 #include <dev/kbd.h>
-#include <dev/pic.h>
+#include <intr/pic.h>
 
 extern void* isr_addr_table[];
 

@@ -4,7 +4,7 @@
 #include <mem/mem.h>
 #include <mm/mem.h>
 #include <boot/stivale2.h>
-#include <cpu/interrupt.h>
+#include <intr/interrupt.h>
 
 #define PAGE_FAULT_IRQ_VEC      0xE
 #define PAGE_FAULT_P_MASK       (1 << 0)

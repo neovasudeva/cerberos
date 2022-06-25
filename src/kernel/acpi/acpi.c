@@ -12,6 +12,11 @@ static rsdt_t rsdt = {
     .table_ptr = NULL
 };
 
+/* 
+ * verify_rsdp_checksum
+ * verifies RSDP checksum given @param rsdp
+ * @param rsdp : pointer to RSDP
+ */
 static bool verify_rsdp_checksum(rsdp_t* rsdp) {
     uint8_t checksum = 0;
     uint8_t* ptr = (uint8_t*) rsdp;
@@ -34,7 +39,21 @@ static bool verify_rsdp_checksum(rsdp_t* rsdp) {
     return valid_v1 && ((checksum & 0xff) == 0);
 }
 
-// sdt_hdr = hdr of root table
+/* 
+ * get_rsdt  
+ * returns rsdt struct containing metadata of RSDT/XSDT
+ * @returns RSDT metadata struct
+ */
+rsdt_t* get_rsdt(void) {
+    return &rsdt;
+}
+
+/*
+ * acpi_find_table
+ * parses RSDT/XSDT and finds signature passed via @param table
+ * @param table : 4 character signature of table to look for
+ * @returns pointer to SDT header of table or NULL if not found
+ */
 sdt_header_t* acpi_find_table(char* table) {
     // verify root sdt_hdr is not NULL
     if (rsdt.sdt_hdr == NULL) {
@@ -91,10 +110,11 @@ sdt_header_t* acpi_find_table(char* table) {
     return NULL;
 }
 
-rsdt_t* get_rsdt(void) {
-    return &rsdt;
-}
-
+/*
+ * acpi_init
+ * finds ACPI tables and parses MADT
+ * @param handover : bootloader handover struct
+ */
 void acpi_init(struct stivale2_struct* handover) {
     struct stivale2_struct_tag_rsdp* rsdp_tag = (struct stivale2_struct_tag_rsdp*) stivale2_get_tag(handover, STIVALE2_STRUCT_TAG_RSDP_ID);
     if (rsdp_tag == NULL)

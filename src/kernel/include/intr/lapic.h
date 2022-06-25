@@ -135,5 +135,5 @@ void lapic_eoi(uint8_t intr_vec);
 
 uint32_t lapic_read(lapic_reg_e reg);
 void lapic_write(lapic_reg_e reg, uint32_t val);
-void lapic_ipi(ipi_t* ipi);
+void lapic_ipi(ipi_t ipi);
 uint8_t lapic_id(void);

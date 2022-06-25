@@ -3,13 +3,13 @@
 #include <sys/sys.h>
 #include <acpi/sdt.h>
 
-#define PROCESSOR_LAPIC             ((uint8_t) 0)
-#define IO_APIC                     ((uint8_t) 1)
-#define INTERRUPT_SRC_OVERRIDE      ((uint8_t) 2)
-#define APIC_NMI_SRC                ((uint8_t) 3)
-#define LAPIC_NMI                   ((uint8_t) 4)
-#define LAPIC_ADDR_OVERRIDE         ((uint8_t) 5)
-#define LX2APIC                     ((uint8_t) 9)
+#define MADT_LAPIC                  ((uint8_t) 0)
+#define MADT_IOAPIC                 ((uint8_t) 1)
+#define MADT_INTR_SRC_OVERRIDE      ((uint8_t) 2)
+#define MADT_APIC_NMI_SRC           ((uint8_t) 3)
+#define MADT_LAPIC_NMI              ((uint8_t) 4)
+#define MADT_LAPIC_ADDR_OVERRIDE    ((uint8_t) 5)
+#define MADT_LX2APIC                ((uint8_t) 9)
 
 #define MADT_OFFSET                 ((uint8_t) 0x2c)
 
@@ -108,4 +108,5 @@ typedef struct {
     uint64_t lapic_paddr;
 } madt_info_t;
 
+madt_info_t* get_madt_info(void);
 void parse_madt(sdt_header_t* madt_hdr);

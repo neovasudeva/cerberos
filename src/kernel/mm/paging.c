@@ -1,6 +1,6 @@
 #include <mm/paging.h>
 #include <mm/pmm.h>
-#include <cpu/interrupt.h>
+#include <intr/interrupt.h>
 
 /* 
  * paging_init

@@ -1,6 +1,8 @@
 #pragma once
 
-#include <stdint.h>
+#include <sys/sys.h>
+
+#define INTR_DEV_OFFSET 0x20
 
 /* manually pushed regs onto stack during interrupt */
 typedef struct {

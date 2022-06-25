@@ -1,4 +1,4 @@
-#include <cpu/gdt.h>
+#include <mm/gdt.h>
 
 static tss_t tss = {0};
 gdt_t gdt = {};

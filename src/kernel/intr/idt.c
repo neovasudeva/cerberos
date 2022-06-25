@@ -1,4 +1,4 @@
-#include <cpu/idt.h>
+#include <intr/idt.h>
 
 extern void* isr_addr_table[];
 idtr_t idt_info = {};
