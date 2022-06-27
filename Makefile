@@ -64,4 +64,4 @@ run: $(SYSROOT_ISO)
 
 .PHONY: clean
 clean:
-	rm -rf build
+	rm -rf out

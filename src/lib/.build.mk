@@ -5,6 +5,6 @@ LIB_C_SRC+= \
 LIB_DEPS=$(LIB_C_SRC:.c=.d)
 
 -include $(LIB_DEPS)
-build/lib/%.c.o: src/lib/%.c
+out/lib/%.c.o: src/lib/%.c
 	$(MKPDIR)
 	$(CC) $(KCFLAGS) -c $^ -o $@ 

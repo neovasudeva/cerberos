@@ -17,10 +17,10 @@ KERNEL_S_SRC+= \
 KERNEL_DEPS=$(KERNEL_C_SRC:.c=.d)
 
 -include $(KERNEL_DEPS)
-build/kernel/%.c.o: src/kernel/%.c
+out/kernel/%.c.o: src/kernel/%.c
 	$(MKPDIR)
 	$(CC) $(KCFLAGS) -c $^ -o $@ 
 
-build/kernel/%.S.o: src/kernel/%.S
+out/kernel/%.S.o: src/kernel/%.S
 	$(MKDIR)
 	$(ASM) $^ $(KASMFLAGS) -o $@ 

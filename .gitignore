@@ -1,5 +1,5 @@
 # igonre build directories
-build/*
+out/*
 
 # swp files
 *.swp

@@ -1,6 +1,6 @@
 LIMINE=deps/limine/limine-install
-SYSROOT=build/sysroot
-SYSROOT_ISO=build/sysroot.iso
+SYSROOT=out/sysroot
+SYSROOT_ISO=out/sysroot.iso
 
 $(LIMINE):
 	make -C deps/limine
