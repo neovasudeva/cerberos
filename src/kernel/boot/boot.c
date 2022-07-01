@@ -6,6 +6,7 @@
 #include <dev/text.h>
 #include <dev/com.h>
 #include <dev/kbd.h>
+#include <dev/pit.h>
 #include <intr/pic.h>
 #include <intr/idt.h>
 #include <intr/apic.h>
@@ -38,6 +39,7 @@ void _start(struct stivale2_struct* handover) {
 
     /* devices */
     kbd_init();
+    pit_init();
 
     for (;;) {
         hlt();

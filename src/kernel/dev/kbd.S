@@ -1,6 +1,8 @@
-%include "asm_util.S"
+%include "intr/asm_util.S"
 
-%define KBD_INTR_VEC 0x21
+;%define KBD_INTR_VEC 0x21
+%define KBD_IRQ         1
+%define KBD_INTR_VEC    (KBD_IRQ + INTR_DEV_OFFSET)
 
 global wrapper_kbd_intr_handler
 extern kbd_intr_handler

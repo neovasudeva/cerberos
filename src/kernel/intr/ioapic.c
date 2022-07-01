@@ -110,29 +110,29 @@ void ioapic_set_gsi(madt_intr_src_override_t* override) {
  * ioapic_set_irq 
  * register an IRQ in a redirection of the IO APIC with @param ioapic_id
  * @param ioapic_id : IO APIC to store redirection table entry in
- * @param irq : IRQ to register
+ * @param redtbl_entry : the entry in redtbl to edit
  * @param entry : redirectino table entry to store
  */
-void ioapic_set_irq(uint8_t ioapic_id, uint8_t irq, redtbl_entry_t entry) {
+void ioapic_set_irq(uint8_t ioapic_id, uint8_t redtbl_entry, redtbl_entry_t entry) {
     // verify ioapic is registered
     if (!is_registered(ioapic_id)) {
         error("[ioapic_set_irq] io apic read either with invalid id %u or io apic is not present\n", ioapic_id);
         return;
     }
 
-    ioapic_write(ioapic_id, IOREDTBL_REG_HIGH(irq), entry.high_raw);
-    ioapic_write(ioapic_id, IOREDTBL_REG_LOW(irq), entry.low_raw);
+    ioapic_write(ioapic_id, IOREDTBL_REG_HIGH(redtbl_entry), entry.high_raw);
+    ioapic_write(ioapic_id, IOREDTBL_REG_LOW(redtbl_entry), entry.low_raw);
 }
 
 /* 
  * ioapic_quickset_irq
  * shortcut version of ioapic_set_irq with predefined redirection table fields
  * @param ioapic_id : IO APIC to store redirection table entry in
- * @param irq : IRQ to register
+ * @param redtbl_entry : the entry in redtbl to edit
  * @param lapic_id : LAPIC to delivery interrupt to
  * @param vector : interrupt vector to deliver to processor
  */
-void ioapic_quickset_irq(uint8_t ioapic_id, uint8_t irq, uint8_t lapic_id, uint8_t vector) {
+void ioapic_quickset_irq(uint8_t ioapic_id, uint8_t redtbl_entry, uint8_t lapic_id, uint8_t vector) {
     // verify ioapic is registered
     if (!is_registered(ioapic_id)) {
         error("[ioapic_quickset_irq] io apic read either with invalid id %u or io apic is not present\n", ioapic_id);
@@ -140,8 +140,8 @@ void ioapic_quickset_irq(uint8_t ioapic_id, uint8_t irq, uint8_t lapic_id, uint8
     }
 
     redtbl_entry_t entry;
-    uint32_t high = ioapic_read(ioapic_id, IOREDTBL_REG_HIGH(irq));
-    uint32_t low = ioapic_read(ioapic_id, IOREDTBL_REG_LOW(irq));
+    uint32_t high = ioapic_read(ioapic_id, IOREDTBL_REG_HIGH(redtbl_entry));
+    uint32_t low = ioapic_read(ioapic_id, IOREDTBL_REG_LOW(redtbl_entry));
     entry.high_raw = high;
     entry.low_raw = low;
 
@@ -151,8 +151,79 @@ void ioapic_quickset_irq(uint8_t ioapic_id, uint8_t irq, uint8_t lapic_id, uint8
     entry.delivery_mode = IOAPIC_FIXED;
     entry.vector = vector;
 
-    ioapic_set_irq(ioapic_id, irq, entry);
+    ioapic_set_irq(ioapic_id, redtbl_entry, entry);
 }
 
+/*
+ * 
+ */
+uint8_t find_ioapic(uint8_t irq) {
+    // parse interrupt source overrides from MADT
+    madt_intr_src_override_t** iso = get_madt_info()->intr_src_overrides;
+
+    // find gsi ISA IRQ was mapped to
+    uint32_t gsi = (uint32_t) -1;
+    for (uint64_t i = 0; i < get_madt_info()->num_intr_src_override; i++) {
+        if (iso[i]->irq_src == irq) {
+            gsi = iso[i]->gsi;
+            break;
+        }
+    }
+
+    // there is no interrupt source override, so gsi is equal to irq
+    if (gsi == (uint32_t) -1) 
+        gsi = (uint32_t) irq;
+
+    // find ioapic id based on gsi (or irq if no intr source override)
+    for (uint8_t i = 0; i < MAX_IOAPICS; i++) {
+        if (!ioapics[i].present)
+            continue;
+
+        int64_t diff = ((int64_t) gsi) - ((int64_t) ioapics[i].redtbl_entries);
+        if (diff < 0) 
+            return i;
+
+        gsi = (uint32_t) diff;
+    }
+
+    error("[find_ioapic] an IO APIC id was not found for irq %u mapped to gsi %u\n", irq, gsi);
+    return 0;
+}
+
+/*
+ *
+ */
+uint32_t find_redtbl_entry(uint8_t irq) {
+    // parse interrupt source overrides from MADT
+    madt_intr_src_override_t** iso = get_madt_info()->intr_src_overrides;
+
+    // find gsi ISA IRQ was mapped to
+    uint32_t gsi = (uint32_t) -1;
+    for (uint64_t i = 0; i < get_madt_info()->num_intr_src_override; i++) {
+        if (iso[i]->irq_src == irq) {
+            gsi = iso[i]->gsi;
+            break;
+        }
+    }
+
+    // there is no interrupt source override, so gsi is equal to irq
+    if (gsi == (uint32_t) -1) 
+        gsi = (uint32_t) irq;
+
+    // find redtbl entry for gsi
+    for (uint8_t i = 0; i < MAX_IOAPICS; i++) {
+        if (!ioapics[i].present)
+            continue;
+
+        int64_t diff = ((int64_t) gsi) - ((int64_t) ioapics[i].redtbl_entries);
+        if (diff < 0) 
+            return gsi;
+
+        gsi = (uint32_t) diff;
+    }
+
+    error("[find_ioapic] an IO APIC id was not found for irq %u mapped to gsi %u\n", irq, gsi);
+    return 0;
+}
 
 

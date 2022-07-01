@@ -1,4 +1,4 @@
-%include "asm_util.S"
+%include "intr/asm_util.S"
 
 %define PAGE_FAULT_INTR_VEC 0xE
 

@@ -115,5 +115,8 @@ void ioapic_register(madt_ioapic_t* ioapic);
 uint32_t ioapic_read(uint8_t id, uint8_t reg);
 void ioapic_write(uint8_t id, uint8_t reg, uint32_t val);
 void ioapic_set_gsi(madt_intr_src_override_t* override);
-void ioapic_set_irq(uint8_t ioapic_id, uint8_t irq, redtbl_entry_t entry);
-void ioapic_quickset_irq(uint8_t ioapic_id, uint8_t irq, uint8_t apic_id, uint8_t vector);
+void ioapic_set_irq(uint8_t ioapic_id, uint8_t redtbl_entry, redtbl_entry_t entry);
+void ioapic_quickset_irq(uint8_t ioapic_id, uint8_t redtbl_entry, uint8_t apic_id, uint8_t vector);
+
+uint8_t find_ioapic(uint8_t irq);
+uint32_t find_redtbl_entry(uint8_t irq);

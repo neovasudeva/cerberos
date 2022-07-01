@@ -1,4 +1,4 @@
-%include "asm_util.S"
+%include "intr/asm_util.S"
 
 %macro isr_err 1
 intr_%1:

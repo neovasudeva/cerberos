@@ -1,5 +1,7 @@
-%ifndef INT_UTIL_H
-%define INT_UTIL_H
+%ifndef INT_ASM_UTIL_H
+%define INT_ASM_UTIL_H
+
+%define INTR_DEV_OFFSET 0x20
 
 %macro push_all 0
     push rax
