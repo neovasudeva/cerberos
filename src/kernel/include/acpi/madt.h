@@ -22,24 +22,24 @@ typedef struct {
     uint32_t lapic_addr;
     uint32_t flags;
     uint8_t data[];
-} __attribute__((packed)) madt_t;
+} __attribute__((packed)) madt_header_t;
 
 /* headers for entries in MADT */
 typedef struct {
     uint8_t entry_type;
     uint8_t length;
-} __attribute__ ((packed)) madt_header_t;
+} __attribute__ ((packed)) madt_entry_header_t;
 
 /* MADT entry structs */
 typedef struct {
-    madt_header_t madt_hdr;
+    madt_entry_header_t madt_hdr;
     uint8_t acpi_processor_id;
     uint8_t apic_id;
     uint32_t flags;
 } __attribute__ ((packed)) madt_lapic_t;
 
 typedef struct {
-    madt_header_t madt_hdr;
+    madt_entry_header_t madt_hdr;
     uint8_t io_apic_id;
     uint8_t reserved;
     uint32_t io_apic_addr;
@@ -47,7 +47,7 @@ typedef struct {
 } __attribute__ ((packed)) madt_ioapic_t;
 
 typedef struct {
-    madt_header_t madt_hdr;
+    madt_entry_header_t madt_hdr;
     uint8_t bus_src;
     uint8_t irq_src;
     uint32_t gsi;
@@ -55,7 +55,7 @@ typedef struct {
 } __attribute__ ((packed)) madt_intr_src_override_t;
 
 typedef struct {
-    madt_header_t madt_hdr;
+    madt_entry_header_t madt_hdr;
     uint8_t nmi_src;
     uint8_t reserved;
     uint16_t flags;
@@ -63,20 +63,20 @@ typedef struct {
 } __attribute__ ((packed)) madt_apic_nmi_src_t;
 
 typedef struct {
-    madt_header_t madt_hdr;
+    madt_entry_header_t madt_hdr;
     uint8_t acpi_processor_id;
     uint16_t flags;
     uint8_t lint;
 } __attribute__ ((packed)) madt_lapic_nmi_t;
 
 typedef struct {
-    madt_header_t madt_hdr;
+    madt_entry_header_t madt_hdr;
     uint16_t reserved;
     uint64_t lapic_paddr;
 } __attribute__ ((packed)) madt_lapic_addr_override_t;
 
 typedef struct {
-    madt_header_t madt_hdr;
+    madt_entry_header_t madt_hdr;
     uint16_t reserved;
     uint32_t lx2apic_id;
     uint32_t flags;

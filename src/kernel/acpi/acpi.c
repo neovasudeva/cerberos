@@ -26,7 +26,7 @@ static bool verify_rsdp_checksum(rsdp_t* rsdp) {
         ptr++;
     }
 
-    bool valid_v1 = (checksum & 0xff) == 0;
+    bool valid_v1 = checksum == 0;
 
     if (rsdp->revision == ACPI_V1) 
         return valid_v1;
@@ -36,7 +36,7 @@ static bool verify_rsdp_checksum(rsdp_t* rsdp) {
         ptr++;
     }
 
-    return valid_v1 && ((checksum & 0xff) == 0);
+    return valid_v1 && (checksum == 0);
 }
 
 /* 
@@ -124,7 +124,7 @@ void acpi_init(struct stivale2_struct* handover) {
     if (!verify_rsdp_checksum(rsdp)) 
         panic("RSDP checksum could not be verified");
 
-    info("[acpi_init] rsdp revision: %u\n", rsdp->revision);
+    log("[acpi_init] rsdp revision: %u\n", rsdp->revision);
 
     rsdt.sdt_hdr = (sdt_header_t*) P2V(rsdp->rsdt_address);
     rsdt.acpi_version = rsdp->revision;
@@ -139,7 +139,6 @@ void acpi_init(struct stivale2_struct* handover) {
         panic("MADT table was not found");
     
     madt_hdr = (sdt_header_t*) P2V((paddr_t) madt_hdr);
-    log("madt_hdr signature: %s\n", madt_hdr->signature); 
 
     // parse madt
     parse_madt(madt_hdr);

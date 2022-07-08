@@ -60,6 +60,18 @@ static void reset_madt_info(void) {
     madt_info.lapic_paddr                = 0;
 }
 
+static bool verify_madt_checksum(madt_header_t* madt) {
+    uint8_t checksum = 0;
+    uint8_t* ptr = (uint8_t*) madt;
+
+    for (size_t i = 0; i < madt->sdt_hdr.length; i++) {
+        checksum += *ptr;
+        ptr++;
+    }
+
+    return (checksum == 0);
+}
+
 /* 
  * get_madt_info
  * @returns pointer to madt_info struct
@@ -74,11 +86,11 @@ madt_info_t* get_madt_info(void) {
  * @param madt_hdr : pointer to header of MADT 
  */
 void parse_madt(sdt_header_t* madt_hdr) {
-    madt_t* madt = (madt_t*) madt_hdr;
-    info("[parse_madt] MADT information:\n");
-    log("---------------------------\n");
-    log("[parse_madt] lapic address: 0x%lx\n", madt->lapic_addr);
-    log("[parse_madt] madt length: %u\n", madt->sdt_hdr.length);
+    madt_header_t* madt = (madt_header_t*) madt_hdr;
+    if (!verify_madt_checksum(madt)) {
+        error("[parse_madt] MADT table failed checksum check.\n");
+        return;
+    }
 
     // clear current MADT info struct
     reset_madt_info();
@@ -90,7 +102,7 @@ void parse_madt(sdt_header_t* madt_hdr) {
     log("---------------------------\n");
     uint8_t i = 0; 
     while (i < madt->sdt_hdr.length - MADT_OFFSET) {
-        madt_header_t* entry_hdr = (madt_header_t*) &madt->data[i];
+        madt_entry_header_t* entry_hdr = (madt_entry_header_t*) &madt->data[i];
 
         switch (entry_hdr->entry_type) {
             case MADT_LAPIC:
@@ -155,7 +167,7 @@ void parse_madt(sdt_header_t* madt_hdr) {
     i = 0; 
     uint64_t entry_counters[MAX_ENTRY_TYPE] = {0};
     while (i < madt->sdt_hdr.length - MADT_OFFSET) {
-        madt_header_t* entry_hdr = (madt_header_t*) &madt->data[i];
+        madt_entry_header_t* entry_hdr = (madt_entry_header_t*) &madt->data[i];
 
         switch (entry_hdr->entry_type) {
             case MADT_LAPIC:

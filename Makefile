@@ -12,7 +12,7 @@ CFLAGS?= \
 	-pipe \
 	-g \
 	-ggdb \
-	-O2 
+	-O3 
 
 KCFLAGS= \
 	$(CFLAGS) \

@@ -7,6 +7,7 @@
 #include <dev/com.h>
 #include <dev/kbd.h>
 #include <dev/pit.h>
+#include <dev/hpet.h>
 #include <intr/pic.h>
 #include <intr/idt.h>
 #include <intr/apic.h>
@@ -39,7 +40,10 @@ void _start(struct stivale2_struct* handover) {
 
     /* devices */
     kbd_init();
-    pit_init();
+    if (!hpet_init()) {
+        warning("HPET failed to start. Falling back onto PIT and RTC ...\n");
+        //pit_init();
+    }
 
     for (;;) {
         hlt();
