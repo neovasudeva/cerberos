@@ -111,3 +111,40 @@ void lapic_eoi(uint8_t intr_vec) {
     if (isr & (1 << isr_reg_bit)) 
         lapic_write(LAPIC_EOI_REG, LAPIC_EOI);
 }
+
+/*
+ *
+ */
+void lapic_timer(void) {
+    // set the timer interrupt vector, periodic/one-shot mode in timer LVT reg
+    lvt_timer_t timer;
+    timer.raw = lapic_read(LAPIC_LVT_TIMER_REG); 
+    log("timer initial raw : 0x%x\n", timer.raw);
+    timer.vector = LAPIC_TIMER_INTR_VEC;
+    timer.timer_mode = LVT_TIMER_PERIODIC;
+    lapic_write(LAPIC_LVT_TIMER_REG, timer.raw);
+
+    // register intr handler
+    register_intr_handler(&wrapper_lapic_timer_intr_handler, LAPIC_TIMER_INTR_VEC);
+
+    // set divide reg
+    timer_divide_t div;
+    div.raw = lapic_read(LAPIC_DIVIDE_CONFIG_REG);
+    LAPIC_TIMER_DIV_SET(div, LAPIC_TIMER_DIV_4); // arbitrary, change
+    lapic_write(LAPIC_DIVIDE_CONFIG_REG, div.raw);
+
+    // set initial count reg
+    uint32_t icr = 1024;
+    lapic_write(LAPIC_INIT_COUNT_REG, icr);
+
+    // unmask timer interrupt in LVT
+    timer.raw = lapic_read(LAPIC_LVT_TIMER_REG);
+    timer.mask = LVT_TIMER_UNMASK;
+    lapic_write(LAPIC_LVT_TIMER_REG, timer.raw);
+
+}
+
+void lapic_timer_intr_handler(void) {
+    log("hello lapic timer !!!\n");
+    lapic_eoi(LAPIC_TIMER_INTR_VEC);
+}

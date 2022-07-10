@@ -46,6 +46,9 @@ void apic_init(struct stivale2_struct* handover) {
     // enable local APIC of current processor
     log("[apic_init] enabling local apic with id %u ... \n", lapic_id());
     lapic_enable();
+
+    log("[apic_init] starting local apic timer with id %u ... \n", lapic_id());
+    lapic_timer();
 }
 
 /*

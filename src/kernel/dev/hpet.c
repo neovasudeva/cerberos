@@ -6,7 +6,7 @@
 #include <log.h>
 
 /* misc marcos */
-#define FEMTO_PER_SEC       ((uint64_t) 0x38D7EA4C68000) // = 10^15
+#define FEMTO_PER_SEC       ((uint64_t) 1000000000000000) // = 10^15
 
 /* HPET general info */
 hpet_general_t hpet = {0};
@@ -82,7 +82,7 @@ bool hpet_init(void) {
     hpet_write(HPET_TIMER_CCR(0), timer_ccr.raw);
 
     hpet_cvr_t timer_cvr;
-    timer_cvr.raw = hpet.freq / 1000; // 1000 is arbitrary. represents number of counts per interrupt
+    timer_cvr.raw = hpet.freq / 1000;  // 1000 is arbitrary, can be anything
     hpet_write(HPET_TIMER_CVR(0), timer_cvr.raw);
 
     // enable legacy routing and start main counter

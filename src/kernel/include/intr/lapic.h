@@ -2,6 +2,11 @@
 
 #include <sys/sys.h>
 #include <acpi/madt.h>
+#include <intr/interrupt.h>
+
+/* change me */
+#define LAPIC_TIMER_IRQ         10
+#define LAPIC_TIMER_INTR_VEC    (LAPIC_TIMER_IRQ + INTR_DEV_OFFSET)
 
 /* LAPIC reg offsets */
 typedef enum {
@@ -128,10 +133,67 @@ typedef union {
     } __attribute__((packed));
 } ipi_t;
 
+/* LVT timer delivery status */
+#define LVT_TIMER_IDLE      0b0
+#define LVT_TIMER_PENDING   0b1
+
+/* LVT Timer mask */
+#define LVT_TIMER_UNMASK    0b0
+#define LVT_TIMER_MASK      0b1
+
+/* LVT Timer mode */
+#define LVT_TIMER_ONE_SHOT  0b00
+#define LVT_TIMER_PERIODIC  0b01
+#define LVT_TIMER_TSC       0b10
+
+/* LVT timer register */
+typedef union {
+    struct {
+        uint8_t vector;
+        uint8_t reserved0 : 4;
+        uint8_t delivery_status : 1;
+        uint8_t reserved1 : 3;
+        uint8_t mask : 1;
+        uint8_t timer_mode : 2;
+        uint16_t reserved2 : 13;
+    } __attribute__ ((packed));
+    uint32_t raw;
+} lvt_timer_t;
+
+/* timer divide register values */
+#define LAPIC_TIMER_DIV_1   0b111
+#define LAPIC_TIMER_DIV_2   0b000
+#define LAPIC_TIMER_DIV_4   0b001
+#define LAPIC_TIMER_DIV_8   0b010
+#define LAPIC_TIMER_DIV_16  0b011
+#define LAPIC_TIMER_DIV_32  0b100
+#define LAPIC_TIMER_DIV_64  0b101
+#define LAPIC_TIMER_DIV_128 0b110
+
+/* Timer divide register divide set */
+#define LAPIC_TIMER_DIV_SET(div_reg, val) \
+    div_reg.divide01 = (val & 3);   \
+    div_reg.divide2 = (val & 8);
+
+/* Timer divide register */
+typedef union {
+    struct {
+        uint8_t divide01 : 2;
+        uint8_t zero : 1;
+        uint8_t divide2 : 1;
+        uint32_t reserved : 28;
+    } __attribute__ ((packed));
+    uint32_t raw;
+} timer_divide_t;
+
 /* lapic api */
 void lapic_enable(void);
 void lapic_disable(void);
 void lapic_eoi(uint8_t intr_vec);
+
+void lapic_timer(void);
+void lapic_timer_intr_handler(void);
+extern void wrapper_lapic_timer_intr_handler(void);
 
 uint32_t lapic_read(lapic_reg_e reg);
 void lapic_write(lapic_reg_e reg, uint32_t val);
