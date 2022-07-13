@@ -12,7 +12,7 @@ CFLAGS?= \
 	-pipe \
 	-g \
 	-ggdb \
-	-O2 
+	-O3 
 
 KCFLAGS= \
 	$(CFLAGS) \
@@ -53,14 +53,18 @@ QEMUFLAGS= \
 	-m 4G \
 	-smp 2 \
 	-drive format=raw,media=cdrom,file=$(SYSROOT_ISO) \
-	-serial stdio \
-	-s -S
+	-serial stdio 
 
 .PHONY: all
 all: $(SYSROOT_ISO)
 
+.PHONY: run
 run: $(SYSROOT_ISO)
 	qemu-system-x86_64 $(QEMUFLAGS) 
+
+.PHONY: debug
+debug: $(SYSROOT_ISO)
+	qemu-system-x86_64 $(QEMUFLAGS) -s -S
 
 .PHONY: clean
 clean:

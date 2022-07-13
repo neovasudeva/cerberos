@@ -114,10 +114,10 @@ static memblock_t* merge_right(memblock_t* header) {
     }
 
     // verify header is free
-    if (!is_free(header)) {
-        error("[merge_right] merge_right attempt on non-free header.\n");
-        return NULL;
-    }
+    // if (!is_free(header)) {
+    //     error("[merge_right] merge_right attempt on non-free header.\n");
+    //     return NULL;
+    // }
 
     memblock_t* right_header = header->next;
 
@@ -232,8 +232,8 @@ static inline memblock_t* merge(memblock_t* header) {
  */
 static memblock_t* split(memblock_t* hdr, size_t num_bytes) {
     // verify hdr is free and non-NULL
-    if (hdr == NULL || !is_free(hdr)) {
-        error("[split] hdr is either NULL or not free\n");
+    if (hdr == NULL) {
+        error("[split] hdr is NULL\n");
         return NULL;
     }
 
@@ -370,7 +370,7 @@ void kfree(void* ptr) {
     
     // verify header is in use
     if (is_free(header)) {
-        error("[kfree] free request called on in-use memory block\n");
+        error("[kfree] free request called on an already free memory block\n");
         return;
     }
 
@@ -379,6 +379,46 @@ void kfree(void* ptr) {
 
     // merge neighboring blocks
     header = merge(header);
+}
+
+/*
+ * krealloc 
+ * will expand an already dynamically allocated memory area by first
+ *  1. trying to expand the existing memory area. If that fails, it will
+ *  2. create a new area of request size
+ * Note that when falling back to method 2, the old memory
+ * area will be freed and hence invalid. 
+ * @param ptr : pointer to allocated memory that needs to be expanded
+ * @param size : the new size the area must be expanded to
+ * @returns pointer to newly expanded area or NULL upon failure
+ */
+void* krealloc(void* ptr, size_t size) {
+    memblock_t* header = (memblock_t*) ((vaddr_t) ptr - sizeof(memblock_t));
+
+    // verify header is in use
+    if (is_free(header)) {
+        error("[krealloc] realloc request called on a free memory block\n");
+        return NULL;
+    }
+
+    header = merge_right(header);
+
+    // check if merged header is large enough
+    if (header->size >= size) {
+        header = split(header, size);
+        return CAST(block_start_addr(header), void*);
+    }
+
+    // allocate new area 
+    void* new_ptr = kmalloc(size);
+    if (new_ptr == NULL)
+        return NULL;
+
+    // copy over data from old area then free it
+    memcpy(new_ptr, ptr, header->size);
+    kfree(ptr);
+
+    return new_ptr;
 }
 
 /* 

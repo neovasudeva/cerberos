@@ -22,5 +22,5 @@ out/kernel/%.c.o: src/kernel/%.c
 	$(CC) $(KCFLAGS) -c $^ -o $@ 
 
 out/kernel/%.S.o: src/kernel/%.S
-	$(MKDIR)
+	$(MKPDIR)
 	$(ASM) $^ $(KASMFLAGS) -o $@ 

@@ -10,6 +10,7 @@
 /* kernel heap api */
 void* kmalloc(size_t size);
 void kfree(void* ptr);
+void* krealloc(void* ptr, size_t size);
 
 void kheap_init(struct stivale2_struct* handover, size_t num_pages);
 
