@@ -115,6 +115,15 @@ inline void map_destroy(map_t* map) {
     kfree(map);
 }
 
+/* 
+ * map_insert 
+ * inserts key/val pair into the map
+ * @param map : map to insert pair
+ * @param key : key of key/val pair
+ * @param val : val of key/val pair
+ * @param replace : true if new key/val pair should replace an existing entry with same key, 
+ *      false if not (will print error message of there is an existing entry with same key)
+ */
 void map_insert(map_t* map, void* key, void* val, bool replace) {
     // check if resize is needed
     if (map_needs_resize(map))
@@ -145,13 +154,18 @@ void map_insert(map_t* map, void* key, void* val, bool replace) {
     map->size++;
 }
 
+/* 
+ * map_get 
+ * returns a value given a key
+ * @param map : map to search in
+ * @param key : key to find value with
+ * @returns pointer to val or NULL if key is not found
+ */
 void* map_get(map_t* map, void* key) {
     // hash the key
     hash_t hash = djb_hash(key, map->key_data_size) % map->bucket_list->size;
     map_bucket_t* bucket = BUCKET_LIST_GET(map->bucket_list, hash);
     size_t idx = map_bucket_find(bucket, key, map->key_data_size);
-
-    log("data: %u\n", *CAST(BUCKET_GET(bucket, idx).val, int*));
 
     if (idx == CAST(-1, size_t)) 
         return NULL;
@@ -159,6 +173,12 @@ void* map_get(map_t* map, void* key) {
         return BUCKET_GET(bucket, idx).val;
 }
 
+/* 
+ * map_remove
+ * removes a key/val pair from the map
+ * @param map : map to search for key/val pair in 
+ * @param key : key of key/val pair to remove
+ */
 void map_remove(map_t* map, void* key) {
     // hash the key
     hash_t hash = djb_hash(key, map->key_data_size) % map->bucket_list->size;

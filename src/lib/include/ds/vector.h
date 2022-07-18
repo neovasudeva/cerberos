@@ -2,6 +2,22 @@
 
 #include <sys/sys.h>
 
+/* 
+ * Kraken's vector
+ * 
+ * The vector implementation below is similar to C++'s. A vector stores data in contiguous 
+ * heap-allocated memory. When a vector is created, a capacity (or the initial size of the 
+ * internal buffer) can be specified to avoid having to repeatedly expand the internal buffer.
+ * 
+ * Data retrieved from the vector and inserted into the vector are merely COPIES. It is
+ * currently not possible to get the data stored within the vector itself. 
+ * 
+ * When freeing a vector, only the internal buffer and the vector's metadata are freed. Hence,
+ * if the vector contains pointers to other heap allocated memory, it will need to be freed manually
+ * by the user before calling VECTOR_FREE.
+ * 
+ */
+
 #define VEC_INITIAL_CAPACITY    CAST(16, size_t)
 
 typedef struct {

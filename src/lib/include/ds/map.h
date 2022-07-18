@@ -18,6 +18,10 @@
  * break Kraken's hashmap because it would include the spinlock when checking for equality and 
  * generating hashes.
  * 
+ * Internally, the map is a vector of vectors and data retrieved from and inserted into the map
+ * are merely COPIES. The hashmap is not perfect and TODOs are scattered below to pinpoint areas of 
+ * the implementation that need to be changed. 
+ * 
  * Kraken's hashmap implementation is simple, but it comes at the cost of versatility. As a result,
  * one must take extra care when using the hashmap.
  * 
@@ -50,7 +54,7 @@ typedef vector_t map_bucket_t;
         PAIR_FREE(BUCKET_GET(bucket, j));           \
     VECTOR_FREE(bucket);                            \
 }
-// TODO: variable j needs to be unique ^^
+// TODO: variable j needs to be changed to be unique ^^
 
 /* map_bucket_list_t = vector of map_bucket_t* */
 typedef vector_t map_bucket_list_t;     
@@ -65,7 +69,7 @@ typedef vector_t map_bucket_list_t;
         );                                          \
     VECTOR_FREE(bucket_list);                       \
 }               
-// TODO: variable i needs to be unique ^^
+// TODO: variable i needs to be changed to be unique ^^
 
 /* map_t struct */
 typedef struct {
