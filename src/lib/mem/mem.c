@@ -55,6 +55,20 @@ void memset(void* buf, int c, size_t n) {
     }
 }
 
+/* 
+ * memcmp
+ * compares num bytes between buf1 and buf2
+ * @param buf1 : first buffer
+ * @param buf2 : second buffer
+ * @param num : number of bytes to compare between buffers
+ * @returns 0 if equal, otherwise buf1 and buf2 contain different data
+ */
+int memcmp(const void* buf1, const void* buf2, size_t num) {
+    const char* str1 = (const char*) buf1;
+    const char* str2 = (const char*) buf2;
+    return strncmp(str1, str2, num);
+}
+
 
 /*                                                                                                   
  * strcpy                                                                                            

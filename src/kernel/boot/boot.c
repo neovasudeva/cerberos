@@ -15,6 +15,7 @@
 #include <mm/kheap.h>
 #include <cpu/smp.h>
 #include <acpi/acpi.h>
+#include <ds/map.h>
 
 /*
  * entry point for kernel 

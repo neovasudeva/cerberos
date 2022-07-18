@@ -7,9 +7,9 @@
 /* returns the address of an element in vector */
 #define get_elem_addr(vec, idx) CAST(CAST(vec->buf, uint8_t*) + ((idx) * vec->data_size), void*) 
 
-inline vector_t* vector_create(size_t data_size) {
+inline vector_t* vector_create(size_t data_size, size_t capacity) {
     vector_t* vec = CAST(kmalloc(sizeof(vector_t)), vector_t*);
-    vec->capacity = VEC_INITIAL_CAPACITY;
+    vec->capacity = capacity;
     vec->size = 0;
     vec->data_size = data_size;
     vec->buf = kmalloc(data_size * vec->capacity);
